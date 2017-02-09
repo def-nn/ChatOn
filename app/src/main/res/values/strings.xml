@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">ChatOn</string>
+
+    <string name="API_BASE_URL">https://chaton.ga/api</string>
+    <string name="SOCKET_URL">wss://chaton.ga/wss3/NNN:8080</string>
+
+    <string name="signIn">Sign in</string>
+    <string name="email">Email</string>
+    <string name="pass">Password</string>
+
+    <string name="error_pass">Invalid passord</string>
+    <string name="error_user">User with this email does not exist</string>
+</resources>
