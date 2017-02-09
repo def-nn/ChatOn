@@ -2,6 +2,9 @@ package com.app.chaton.API_helpers;
 
 
 public class RequestObject {
+    /**
+     *  Класс используемый при отправке данных на сервер
+     */
 
     private Object data;
     private String signature;

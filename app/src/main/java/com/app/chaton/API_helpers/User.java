@@ -4,6 +4,9 @@ package com.app.chaton.API_helpers;
 import java.util.HashMap;
 
 public class User {
+    /**
+     *  Класс, хранящий информацию о пользователе
+     */
 
     private final static String NAME = "name";
     private final static String EMAIL = "email";
@@ -18,11 +21,13 @@ public class User {
     private String secret_key;
     private Long _u;
 
+    // Используется при отправке запроса на авторизацию пользователя
     public User(String email, String password) {
         this.email = email;
         this.password = password;
     }
 
+    // Используется при получении ответа от сервера (в виде ассоциативного массива)
     public User(HashMap<String, String> data) {
         this.name = data.get(NAME);
         this.email = data.get(EMAIL);

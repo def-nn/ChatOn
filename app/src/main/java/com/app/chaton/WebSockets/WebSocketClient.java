@@ -1,3 +1,9 @@
+/**
+ *  Так, в эти файлы не лезем
+ *  Это файлы библиотеки для подключения к сокетам
+ */
+
+
 package com.app.chaton.WebSockets;
 
 import android.os.Handler;
@@ -5,8 +11,6 @@ import android.os.HandlerThread;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
-
-import com.app.chaton.WebSockets.HybiParser;
 
 import org.apache.http.*;
 import org.apache.http.client.HttpResponseException;

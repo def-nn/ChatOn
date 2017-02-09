@@ -1,3 +1,9 @@
+/**
+ *  Так, в эти файлы не лезем
+ *  Это файлы библиотеки для подключения к сокетам
+ */
+
+
 //
 // HybiParser.java: draft-ietf-hybi-thewebsocketprotocol-13 parser
 //

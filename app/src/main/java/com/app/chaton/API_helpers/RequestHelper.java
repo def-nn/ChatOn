@@ -11,6 +11,10 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public abstract class RequestHelper {
+    /**
+     *  Реализация отправки запроса
+     *  В понедельник/воскресенье расскажу детальнее
+     */
 
     public static final String ACT_AUTH = "auth";
 
