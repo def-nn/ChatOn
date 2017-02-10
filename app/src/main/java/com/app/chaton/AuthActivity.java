@@ -1,6 +1,8 @@
 package com.app.chaton;
 
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -26,6 +28,7 @@ public class AuthActivity extends AppCompatActivity{
     TextView textError;
 
     CallService callService;
+    PreferenceHelper preferenceHelper;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -33,6 +36,8 @@ public class AuthActivity extends AppCompatActivity{
         setContentView(R.layout.auth);
 
         callService = ServiceGenerator.createService(CallService.class);
+        preferenceHelper = new PreferenceHelper(getSharedPreferences(
+                getResources().getString(R.string.PREFERENCE_FILE), MODE_PRIVATE));
 
         emailInput = (EditText) findViewById(R.id.emailInput);
         passInput = (EditText) findViewById(R.id.passInput);
@@ -51,7 +56,10 @@ public class AuthActivity extends AppCompatActivity{
                 @Override
                 public void onStatusOk(Response<ResponseObject> response) {
                     User user = new User(response.body().getData());
-                    Log.d("myLogs", "Auth with " + user.getEmail());
+                    preferenceHelper.authUser(user);
+
+                    Intent intent = new Intent(AuthActivity.this, MainActivity.class);
+                    startActivity(intent);
                 }
 
                 @Override
@@ -87,7 +95,7 @@ public class AuthActivity extends AppCompatActivity{
                     Log.d("myLogs", "Failure: " + t.toString());
                 }
             };
-            helper.makeResponse(callService, RequestHelper.ACT_AUTH, new RequestObject(user));
+            helper.makeResponse(callService, RequestHelper.ACT_AUTH, new RequestObject(user, preferenceHelper));
         }
     };
 }

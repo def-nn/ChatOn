@@ -40,5 +40,6 @@ public class User {
     public String getEmail() { return this.email; }
     public String getSecretKey() { return this.secret_key; }
     public Long getId() { return this._u; }
+    public boolean isAdmin() { return this.is_admin; }
 
 }

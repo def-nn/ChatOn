@@ -4,6 +4,8 @@
     <string name="API_BASE_URL">https://chaton.ga/api</string>
     <string name="SOCKET_URL">wss://chaton.ga/wss3/NNN:8080</string>
 
+    <string name="PREFERENCE_FILE">ChatOnPref</string>
+
     <string name="signIn">Sign in</string>
     <string name="email">Email</string>
     <string name="pass">Password</string>
