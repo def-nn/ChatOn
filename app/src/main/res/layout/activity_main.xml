@@ -25,4 +25,14 @@
         android:layout_marginTop="67dp"
         android:id="@+id/btnSignIn" />
 
+    <Button
+        android:text="@string/logOut"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btnSignIn"
+        android:layout_alignLeft="@+id/btnSignIn"
+        android:layout_alignStart="@+id/btnSignIn"
+        android:layout_marginTop="20dp"
+        android:id="@+id/btnLogOut" />
+
 </RelativeLayout>

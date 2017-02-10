@@ -1,7 +1,6 @@
 package com.app.chaton;
 
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import com.app.chaton.API_helpers.User;
 
@@ -24,19 +23,6 @@ public class PreferenceHelper {
         return preferences.getBoolean(IS_AUTH, false);
     }
 
-    public void authUser(User user) {
-        SharedPreferences.Editor editor = preferences.edit();
-
-        editor.putBoolean(IS_AUTH, true);
-        editor.putString(NAME, user.getName());
-        editor.putString(EMAIL, user.getEmail());
-        editor.putBoolean(IS_ADMIN, user.isAdmin());
-        editor.putString(SECRET_KEY, user.getSecretKey());
-        editor.putLong(ID, user.getId());
-
-        editor.apply();
-    }
-
     public String getName() {
         return preferences.getString(NAME, "");
     }
@@ -47,5 +33,24 @@ public class PreferenceHelper {
 
     public Long getId() {
         return preferences.getLong(ID, 0);
+    }
+
+    public void authUser(User user) {
+        SharedPreferences.Editor editor = preferences.edit();
+
+        editor.putBoolean(IS_AUTH, true);
+        editor.putString(NAME, user.getName());
+        editor.putString(EMAIL, user.getEmail());
+        editor.putBoolean(IS_ADMIN, user.isAdmin());
+        editor.putString(SECRET_KEY, user.getSecretKey());
+        editor.putLong(ID, user.getId());
+
+        editor.commit();
+    }
+
+    public void reset() {
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.clear();
+        editor.commit();
     }
 }

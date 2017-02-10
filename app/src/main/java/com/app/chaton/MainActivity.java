@@ -1,7 +1,6 @@
 package com.app.chaton;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,6 +9,11 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.app.chaton.API_helpers.CallService;
+import com.app.chaton.API_helpers.RequestHelper;
+import com.app.chaton.API_helpers.RequestObject;
+import com.app.chaton.API_helpers.ResponseObject;
+import com.app.chaton.API_helpers.ServiceGenerator;
 import com.app.chaton.WebSockets.WebSocketClient;
 
 import org.apache.http.message.BasicNameValuePair;
@@ -18,11 +22,14 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import retrofit2.Response;
+
 
 public class MainActivity extends AppCompatActivity {
 
-    Button btnSignIn;
+    Button btnSignIn, btnLogOut;
 
+    CallService callService;
     WebSocketClient client;
     PreferenceHelper preferenceHelper;
 
@@ -32,11 +39,15 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         btnSignIn = (Button) findViewById(R.id.btnSignIn);
+        btnLogOut = (Button) findViewById(R.id.btnLogOut);
+
+        callService = ServiceGenerator.createService(CallService.class);
         preferenceHelper = new PreferenceHelper(getSharedPreferences(
                 getResources().getString(R.string.PREFERENCE_FILE), MODE_PRIVATE));
 
-        Log.d("myLogs", "" + preferenceHelper.isAuth());
         if (preferenceHelper.isAuth()) {
+
+            Log.d("myLogs", "ok " + preferenceHelper.getSecretKey());
 
             ((TextView) findViewById(R.id.tv)).setText("Hello " + preferenceHelper.getName());
             btnSignIn.setText("Your id " + preferenceHelper.getId());
@@ -44,6 +55,46 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
                     Toast.makeText(getApplicationContext(), preferenceHelper.getSecretKey(), Toast.LENGTH_SHORT).show();
+
+                    RequestHelper requestHelper = new RequestHelper() {
+                        @Override
+                        public void onStatusOk(Response<ResponseObject> response) {
+                            Log.d("myLogs", "ok " + response.body().getData().toString());
+                        }
+
+                        @Override
+                        public void onStatusServerError(Response<ResponseObject> response) {
+                            Log.d("myLogs", "server error");
+                        }
+
+                        @Override
+                        public void onStatus405(Response<ResponseObject> response) {}
+                        @Override
+                        public void onStatus406(Response<ResponseObject> response) {}
+
+                        @Override
+                        public void onFail(Throwable t) {
+                            Log.d("myLogs", "fail");
+                        }
+                    };
+
+                    requestHelper.getDialogs(
+                            callService,
+                            new RequestObject(new Object(), preferenceHelper.getId(), preferenceHelper.getSecretKey()),
+                            preferenceHelper.getId(),
+                            preferenceHelper.getSecretKey()
+                    );
+                }
+            });
+
+            btnLogOut.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    preferenceHelper.reset();
+
+                    Intent restartIntent = getIntent();
+                    finish();
+                    startActivity(restartIntent);
                 }
             });
         } else {
@@ -65,7 +116,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        client.disconnect();
     }
 
     private void connectToSocket() {

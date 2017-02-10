@@ -95,7 +95,7 @@ public class AuthActivity extends AppCompatActivity{
                     Log.d("myLogs", "Failure: " + t.toString());
                 }
             };
-            helper.makeResponse(callService, RequestHelper.ACT_AUTH, new RequestObject(user, preferenceHelper));
+            helper.auth(callService, new RequestObject(user));
         }
     };
 }
