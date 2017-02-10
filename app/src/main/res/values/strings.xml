@@ -10,9 +10,13 @@
     <string name="logIn">Log in</string>
     <string name="logOut">Log out</string>
 
+    <string name="reg">Register</string>
     <string name="email">Email</string>
     <string name="pass">Password</string>
 
     <string name="error_pass">Invalid passord</string>
     <string name="error_user">User with this email does not exist</string>
+    <string name="error_empty">Please fill all fields</string>
+
+    <string name="progress">Loading data</string>
 </resources>

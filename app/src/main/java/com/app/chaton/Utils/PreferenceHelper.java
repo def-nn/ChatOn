@@ -1,4 +1,4 @@
-package com.app.chaton;
+package com.app.chaton.Utils;
 
 import android.content.SharedPreferences;
 
@@ -15,7 +15,7 @@ public class PreferenceHelper {
 
     private SharedPreferences preferences;
 
-    PreferenceHelper(SharedPreferences preferences) {
+    public PreferenceHelper(SharedPreferences preferences) {
         this.preferences = preferences;
     }
 

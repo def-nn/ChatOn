@@ -1,6 +1,6 @@
 package com.app.chaton.API_helpers;
 
-import com.app.chaton.Encryptor;
+import com.app.chaton.Utils.Encryptor;
 
 public class RequestObject {
     /**

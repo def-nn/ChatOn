@@ -6,6 +6,8 @@
 
     <color name="colorSelectedDark">#313750</color>
     <color name="colorSelected">#de6361</color>
+    <color name="colorInputDark">#65697c</color>
+    <color name="colorHint">#b2b4bc</color>
 
     <color name="colorWhite">#fff</color>
 </resources>

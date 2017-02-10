@@ -1,15 +1,11 @@
 package com.app.chaton.API_helpers;
 
 
-import android.util.Base64;
 import android.util.Log;
 
-import com.app.chaton.Encryptor;
+import com.app.chaton.Utils.Encryptor;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.codec.digest.DigestUtils;
 
 import java.util.List;
 import java.util.Map;

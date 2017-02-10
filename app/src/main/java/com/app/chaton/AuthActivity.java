@@ -1,15 +1,23 @@
 package com.app.chaton;
 
 
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.app.chaton.API_helpers.CallService;
 import com.app.chaton.API_helpers.RequestHelper;
@@ -17,14 +25,22 @@ import com.app.chaton.API_helpers.RequestObject;
 import com.app.chaton.API_helpers.ResponseObject;
 import com.app.chaton.API_helpers.ServiceGenerator;
 import com.app.chaton.API_helpers.User;
+import com.app.chaton.Utils.PreferenceHelper;
+import com.daimajia.androidanimations.library.Techniques;
+import com.daimajia.androidanimations.library.YoYo;
 
 import retrofit2.Response;
 
 public class AuthActivity extends AppCompatActivity{
 
+    private static final String NOT_EDITED = "not_edited";
+    private static final String EDITED = "edited";
+    private static final String NOT_VALID = "not_valid";
+
+    ViewGroup rootView;
     EditText emailInput, passInput;
-    Button btnSignIn;
-    TextView textError;
+    Button btnLogIn;
+    ProgressDialog progressDialog;
 
     CallService callService;
     PreferenceHelper preferenceHelper;
@@ -38,17 +54,47 @@ public class AuthActivity extends AppCompatActivity{
         preferenceHelper = new PreferenceHelper(getSharedPreferences(
                 getResources().getString(R.string.PREFERENCE_FILE), MODE_PRIVATE));
 
+        rootView = (ViewGroup) findViewById(R.id.rootView);
+
         emailInput = (EditText) findViewById(R.id.emailInput);
         passInput = (EditText) findViewById(R.id.passInput);
-        textError = (TextView) findViewById(R.id.textError);
 
-        btnSignIn = (Button) findViewById(R.id.btnSignIn);
-        btnSignIn.setOnClickListener(onAuth);
+        emailInput.setOnFocusChangeListener(onFocusChangeListener);
+        passInput.setOnFocusChangeListener(onFocusChangeListener);
+
+        btnLogIn = (Button) findViewById(R.id.btnLogIn);
+        btnLogIn.setOnClickListener(onAuth);
+
+        Typeface myriad = Typeface.createFromAsset(getAssets(), "fonts/MyriadPro.ttf");
+        emailInput.setTypeface(myriad);
+        passInput.setTypeface(myriad);
+        btnLogIn.setTypeface(myriad);
+        ((TextView) findViewById(R.id.tvReg)).setTypeface(myriad);
+        ((TextView) findViewById(R.id.tvPass)).setTypeface(myriad);
+
+        progressDialog = new ProgressDialog();
+        progressDialog.setWindow(getWindow());
+
+        passInput.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
+                boolean handled = false;
+                hideKeyboard();
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    btnLogIn.callOnClick();
+                    handled = true;
+                }
+                return handled;
+            }
+        });
     }
 
     private View.OnClickListener onAuth = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
+            if (!validateInput()) return;
+
+            progressDialog.show(getSupportFragmentManager(), "ProgressDialog");
             User user = new User(emailInput.getText().toString(), passInput.getText().toString());
 
             RequestHelper helper = new RequestHelper() {
@@ -57,13 +103,15 @@ public class AuthActivity extends AppCompatActivity{
                     User user = new User(response.body().getData());
                     preferenceHelper.authUser(user);
 
+                    progressDialog.dismiss();
                     Intent intent = new Intent(AuthActivity.this, MainActivity.class);
                     startActivity(intent);
                 }
 
                 @Override
                 public void onStatusServerError(Response<ResponseObject> response) {
-                    Log.d("myLogs", "Server Error");
+                    progressDialog.dismiss();
+                    Toast.makeText(getApplicationContext(), "Server error", Toast.LENGTH_SHORT).show();
                 }
 
                 @Override
@@ -72,7 +120,12 @@ public class AuthActivity extends AppCompatActivity{
                         @Override
                         public void run() {
                             passInput.setText("");
-                            textError.setText(R.string.error_pass);
+                            progressDialog.dismiss();
+
+                            ((Vibrator)getSystemService(VIBRATOR_SERVICE)).vibrate(100);
+                            YoYo.with(Techniques.Shake).duration(600).playOn(passInput);
+                            YoYo.with(Techniques.Shake).duration(600).playOn(findViewById(R.id.iconPass));
+                            Toast.makeText(getApplicationContext(), R.string.error_pass, Toast.LENGTH_SHORT).show();
                         }
                     });
                 }
@@ -84,17 +137,63 @@ public class AuthActivity extends AppCompatActivity{
                         public void run() {
                             emailInput.setText("");
                             passInput.setText("");
-                            textError.setText(R.string.error_user);
+                            progressDialog.dismiss();
+
+                            ((Vibrator)getSystemService(VIBRATOR_SERVICE)).vibrate(100);
+                            YoYo.with(Techniques.Shake).duration(600).playOn(emailInput);
+                            YoYo.with(Techniques.Shake).duration(600).playOn(passInput);
+                            YoYo.with(Techniques.Shake).duration(600).playOn(findViewById(R.id.iconUser));
+                            YoYo.with(Techniques.Shake).duration(600).playOn(findViewById(R.id.iconPass));
+                            Toast.makeText(getApplicationContext(), R.string.error_user, Toast.LENGTH_SHORT).show();
                         }
                     });
                 }
 
                 @Override
                 public void onFail(Throwable t) {
-                    Log.d("myLogs", "Failure: " + t.toString());
+                    progressDialog.dismiss();
+                    Toast.makeText(getApplicationContext(), t.toString(), Toast.LENGTH_SHORT).show();
                 }
             };
             helper.auth(callService, new RequestObject(user));
+        }
+    };
+
+    private boolean validateInput() {
+        if (emailInput.getText().length() == 0 || passInput.getText().length() == 0 ||
+                emailInput.getTag().equals(NOT_EDITED) || passInput.getTag().equals(NOT_EDITED)) {
+            ((Vibrator)getSystemService(VIBRATOR_SERVICE)).vibrate(100);
+            YoYo.with(Techniques.Shake).duration(600).playOn(emailInput);
+            YoYo.with(Techniques.Shake).duration(600).playOn(passInput);
+            YoYo.with(Techniques.Shake).duration(600).playOn(findViewById(R.id.iconUser));
+            YoYo.with(Techniques.Shake).duration(600).playOn(findViewById(R.id.iconPass));
+            Toast.makeText(getApplicationContext(), R.string.error_empty, Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
+    }
+
+    private void hideKeyboard() {
+        View view = this.getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
+
+    View.OnFocusChangeListener onFocusChangeListener = new View.OnFocusChangeListener() {
+        @Override
+        public void onFocusChange(View view, boolean hasFocus) {
+            if (hasFocus) {
+                switch (view.getTag().toString()) {
+                    case NOT_EDITED:
+                        ((EditText) view).setText("");
+                        view.setTag(EDITED);
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
     };
 }

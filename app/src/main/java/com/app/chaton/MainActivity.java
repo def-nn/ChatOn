@@ -10,6 +10,7 @@ import android.widget.Button;
 
 import com.app.chaton.API_helpers.CallService;
 import com.app.chaton.API_helpers.ServiceGenerator;
+import com.app.chaton.Utils.PreferenceHelper;
 import com.app.chaton.WebSockets.WebSocketClient;
 
 import org.apache.http.message.BasicNameValuePair;
