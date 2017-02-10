@@ -6,7 +6,8 @@
 
     <string name="PREFERENCE_FILE">ChatOnPref</string>
 
-    <string name="signIn">Sign in</string>
+    <string name="signUp">Sign up</string>
+    <string name="logIn">Log in</string>
     <string name="logOut">Log out</string>
 
     <string name="email">Email</string>

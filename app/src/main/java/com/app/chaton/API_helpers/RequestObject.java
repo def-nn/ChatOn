@@ -1,17 +1,6 @@
 package com.app.chaton.API_helpers;
 
-
-import android.util.Base64;
-
-import org.apache.commons.codec.binary.Base32;
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.codec.digest.DigestUtils;
-
 import com.app.chaton.Encryptor;
-import com.app.chaton.PreferenceHelper;
-
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 
 public class RequestObject {
     /**

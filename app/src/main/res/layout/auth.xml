@@ -24,7 +24,7 @@
     <EditText
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:inputType="textPersonName"
+        android:inputType="textEmailAddress"
         android:ems="10"
         android:id="@+id/emailInput"
         app:layout_constraintTop_toBottomOf="@+id/textView"
@@ -62,7 +62,6 @@
 
     <TextView
         android:text=""
-        android:textColor="@color/colorRed"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/textError"
@@ -76,7 +75,7 @@
         android:layout_marginLeft="32dp" />
 
     <Button
-        android:text="@string/signIn"
+        android:text="@string/logIn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:id="@+id/btnSignIn"
