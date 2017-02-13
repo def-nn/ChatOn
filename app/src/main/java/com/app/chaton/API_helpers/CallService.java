@@ -1,8 +1,5 @@
 package com.app.chaton.API_helpers;
 
-import java.util.List;
-import java.util.Map;
-
 import retrofit2.Call;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
@@ -19,11 +16,11 @@ public interface CallService {
 
     @FormUrlEncoded
     @POST("./")
-    Call<ResponseObject> auth(@Field(ACT) String act, @Field(ARGS) String args);
+    Call<MapResponseObject> auth(@Field(ACT) String act, @Field(ARGS) String args);
 
     @FormUrlEncoded
     @POST("./")
-    Call<List<Map>> getDialogs(@Header(HEADER_U) String _u, @Header(HEADER_S) String secret_key,
-                               @Field(ACT) String act, @Field(ARGS) String args);
+    Call<MessageResponseObject> getDialogs(@Header(HEADER_U) Long _u, @Header(HEADER_S) String secret_key,
+                                           @Field(ACT) String act, @Field(ARGS) String args);
 
 }

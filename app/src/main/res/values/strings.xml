@@ -17,6 +17,8 @@
     <string name="error_pass">Invalid passord</string>
     <string name="error_user">User with this email does not exist</string>
     <string name="error_empty">Please fill all fields</string>
+    <string name="error_connection">Check your internet connection</string>
+    <string name="error_oops">Oops, something went wrong. Please, try again</string>
 
     <string name="progress">Loading data</string>
 </resources>

@@ -17,6 +17,7 @@ public class User {
     private Boolean is_admin;
     private String secret_key;
     private Long _u;
+    private Long last_online;
 
     // Используется при отправке запроса на авторизацию пользователя
     public User(String email, String password) {
@@ -38,5 +39,6 @@ public class User {
     public String getSecretKey() { return this.secret_key; }
     public Long getId() { return this._u; }
     public boolean isAdmin() { return this.is_admin; }
+    public long when_last_online() { return this.last_online; }
 
 }

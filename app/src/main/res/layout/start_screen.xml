@@ -17,7 +17,9 @@
         android:scaleType="fitCenter"
         app:layout_constraintLeft_toLeftOf="@+id/guideline"
         app:layout_constraintRight_toLeftOf="@+id/guideline2"
-        app:layout_constraintBottom_toTopOf="@+id/guideline3" />
+        app:layout_constraintBottom_toTopOf="@+id/guideline3"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintVertical_bias="0.0" />
 
     <android.support.constraint.Guideline
         android:layout_width="wrap_content"
@@ -26,7 +28,7 @@
         android:orientation="vertical"
         tools:layout_editor_absoluteY="0dp"
         tools:layout_editor_absoluteX="77dp"
-        app:layout_constraintGuide_percent="0.2" />
+        app:layout_constraintGuide_percent="0.20052083" />
 
     <android.support.constraint.Guideline
         android:layout_width="wrap_content"
@@ -72,7 +74,7 @@
         android:background="@drawable/btn_light"
         style="@style/btn"
         app:layout_constraintRight_toRightOf="@+id/btnSignUp"
-        app:layout_constraintLeft_toLeftOf="@+id/btnSignUp"
         app:layout_constraintTop_toBottomOf="@+id/btnSignUp"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="16dp"
+        app:layout_constraintLeft_toLeftOf="@+id/btnSignUp" />
 </android.support.constraint.ConstraintLayout>

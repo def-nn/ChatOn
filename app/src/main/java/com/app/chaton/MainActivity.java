@@ -10,11 +10,14 @@ import android.view.View;
 import android.widget.Button;
 
 import com.app.chaton.API_helpers.CallService;
+import com.app.chaton.API_helpers.Message;
+import com.app.chaton.API_helpers.MessageResponseObject;
 import com.app.chaton.API_helpers.RequestHelper;
 import com.app.chaton.API_helpers.RequestObject;
 import com.app.chaton.API_helpers.ResponseObject;
 import com.app.chaton.API_helpers.ServiceGenerator;
 import com.app.chaton.Utils.PreferenceHelper;
+import com.app.chaton.Utils.ToastHelper;
 import com.app.chaton.org.java_websocket.client.DefaultSSLWebSocketClientFactory;
 import com.app.chaton.org.java_websocket.client.WebSocketClient;
 import com.app.chaton.org.java_websocket.drafts.Draft_17;
@@ -23,17 +26,22 @@ import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.security.ProviderInstaller;
 
+import java.io.StringReader;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.security.GeneralSecurityException;
+import java.util.HashMap;
+import java.util.List;
 
 import javax.net.ssl.SSLContext;
 
-import retrofit2.Response;
 
 import com.google.android.vending.licensing.AESObfuscator;
 import com.google.android.vending.licensing.LicenseChecker;
 import com.google.android.vending.licensing.LicenseCheckerCallback;
 import com.google.android.vending.licensing.ServerManagedPolicy;
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -56,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        checkForLicense();
+//        checkForLicense();
 
         callService = ServiceGenerator.createService(CallService.class);
         preferenceHelper = new PreferenceHelper(getSharedPreferences(
@@ -107,18 +115,25 @@ public class MainActivity extends AppCompatActivity {
 
             RequestHelper requestHelper = new RequestHelper() {
                 @Override
-                public void onStatusOk(Response<ResponseObject> response) {
-                    Log.d("myLogs", "ok");
+                public void onStatusOk(MessageResponseObject response) {
+
                 }
 
                 @Override
-                public void onStatusServerError(Response<ResponseObject> response) {
+                public void onStatusServerError(MessageResponseObject response) {
                     Log.d("myLogs", "server error");
                 }
 
                 @Override
                 public void onFail(Throwable t) {
-                    Log.d("myLogs", "fail");
+                    try {
+                        throw t;
+                    } catch (UnknownHostException e) {
+                        ToastHelper.makeToast(R.string.error_connection);
+                    } catch (Throwable e) {
+                        ToastHelper.makeToast(R.string.error_oops);
+                        e.printStackTrace();
+                    }
                 }
             };
             requestHelper.getDialogs(callService, new RequestObject(new Object(), id, sk), id, sk);
@@ -185,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void applicationError(int errorCode) {
-            Log.d("myLogs", "app error");
+            Log.d("myLogs", "app error " + errorCode );
 
         }
     }

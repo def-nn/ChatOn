@@ -19,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.app.chaton.API_helpers.CallService;
+import com.app.chaton.API_helpers.MapResponseObject;
 import com.app.chaton.API_helpers.RequestHelper;
 import com.app.chaton.API_helpers.RequestObject;
 import com.app.chaton.API_helpers.ResponseObject;
@@ -29,7 +30,9 @@ import com.app.chaton.Utils.ToastHelper;
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
 
-import retrofit2.Response;
+import java.net.UnknownHostException;
+import java.util.HashMap;
+
 
 public class AuthActivity extends AppCompatActivity{
 
@@ -99,8 +102,8 @@ public class AuthActivity extends AppCompatActivity{
 
             RequestHelper helper = new RequestHelper() {
                 @Override
-                public void onStatusOk(Response<ResponseObject> response) {
-                    User user = new User(response.body().getData());
+                public void onStatusOk(MapResponseObject response) {
+                    User user = new User(response.getData());
                     preferenceHelper.authUser(user);
 
                     progressDialog.dismiss();
@@ -109,13 +112,13 @@ public class AuthActivity extends AppCompatActivity{
                 }
 
                 @Override
-                public void onStatusServerError(Response<ResponseObject> response) {
+                public void onStatusServerError(MapResponseObject response) {
                     progressDialog.dismiss();
                     Toast.makeText(getApplicationContext(), "Server error", Toast.LENGTH_SHORT).show();
                 }
 
                 @Override
-                public void onStatus405(Response<ResponseObject> response) {
+                public void onStatus405(MapResponseObject response) {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -131,7 +134,7 @@ public class AuthActivity extends AppCompatActivity{
                 }
 
                 @Override
-                public void onStatus406(Response<ResponseObject> response) {
+                public void onStatus406(MapResponseObject response) {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -151,7 +154,14 @@ public class AuthActivity extends AppCompatActivity{
                 @Override
                 public void onFail(Throwable t) {
                     progressDialog.dismiss();
-                    ToastHelper.makeToast(t.toString());
+                    try {
+                        throw t;
+                    } catch (UnknownHostException e) {
+                        ToastHelper.makeToast(R.string.error_connection);
+                    } catch (Throwable e) {
+                        ToastHelper.makeToast(R.string.error_oops);
+                        e.printStackTrace();
+                    }
                 }
             };
             helper.auth(callService, new RequestObject(user));

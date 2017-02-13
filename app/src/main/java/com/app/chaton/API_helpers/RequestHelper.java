@@ -1,17 +1,12 @@
 package com.app.chaton.API_helpers;
 
 
-import android.util.Log;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
-
-import java.util.List;
-import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -32,64 +27,61 @@ public abstract class RequestHelper {
     static { gson = new GsonBuilder().create(); }
 
     public void auth(CallService callService, RequestObject user) {
-        Call<ResponseObject> call = callService.auth(
+        Call<MapResponseObject> call = callService.auth(
                 new String(Base64.encodeBase64(ACT_AUTH.getBytes())),
                 new String(Base64.encodeBase64(new GsonBuilder().create().toJson(user).getBytes()))
         );
 
-        call.enqueue(new Callback<ResponseObject>() {
+        call.enqueue(new Callback<MapResponseObject>() {
             @Override
-            public void onResponse(Call<ResponseObject> call, Response<ResponseObject> response) {
+            public void onResponse(Call<MapResponseObject> call, Response<MapResponseObject> response) {
                 switch (response.body().getStatus()) {
                     case STATUS_OK:
-                        onStatusOk(response);
+                        onStatusOk(response.body());
                         break;
                     case STATUS_SERVER_ERROR:
-                        onStatusServerError(response);
+                        onStatusServerError(response.body());
                         break;
                     case STATUS_405:
-                        onStatus405(response);
+                        onStatus405(response.body());
                         break;
                     case STATUS_406:
-                        onStatus406(response);
+                        onStatus406(response.body());
                         break;
                 }
             }
 
             @Override
-            public void onFailure(Call<ResponseObject> call, Throwable t) {
+            public void onFailure(Call<MapResponseObject> call, Throwable t) {
                 onFail(t);
             }
         });
     }
 
     public void getDialogs(CallService callService, RequestObject obj, Long _u, String secret_key) {
-        Call<List<Map>> call = callService.getDialogs(
-                _u.toString(),
+        Call<MessageResponseObject> call = callService.getDialogs(
+                _u,
                 encode_s(secret_key),
                 new String(Base64.encodeBase64(ACT_GET_DIALOGS.getBytes())),
                 new String(Base64.encodeBase64(new GsonBuilder().create().toJson(obj).getBytes()))
         );
 
-        call.enqueue(new Callback<List<Map>>() {
+        call.enqueue(new Callback<MessageResponseObject>() {
             @Override
-            public void onResponse(Call<List<Map>> call, Response<List<Map>> response) {
-//                switch (response.body().getStatus()) {
-//                    case STATUS_OK:
-//                        onStatusOk(response);
-//                        break;
-//                    case STATUS_SERVER_ERROR:
-//                        onStatusServerError(response);
-//                        break;
-//                }
-                Log.d("myLogs", "status: " + response.code());
-                Log.d("myLogs", "message: " + response.message());
-                Log.d("myLogs", "body: " + response.body().toString());
+            public void onResponse(Call<MessageResponseObject> call, Response<MessageResponseObject> response) {
+                switch (response.body().getStatus()) {
+                    case STATUS_OK:
+                        onStatusOk(response.body());
+                        break;
+                    case STATUS_SERVER_ERROR:
+                        onStatusServerError(response.body());
+                        break;
+                }
             }
 
             @Override
-            public void onFailure(Call<List<Map>> call, Throwable t) {
-                Log.d("myLogs", "fail: " + t.toString());
+            public void onFailure(Call<MessageResponseObject> call, Throwable t) {
+                onFail(t);
             }
         });
     }
@@ -100,11 +92,13 @@ public abstract class RequestHelper {
         return new String(Hex.encodeHex(DigestUtils.md5(sha1)));
     }
 
-    public abstract void onStatusOk(Response<ResponseObject> response);
-    public abstract void onStatusServerError(Response<ResponseObject> response);
-    public abstract void onFail(Throwable t);
+    public void onStatusOk(MapResponseObject response) {};
+    public void onStatusOk(MessageResponseObject response) {};
+    public void onStatusServerError(MapResponseObject response) {};
+    public void onStatusServerError(MessageResponseObject response) {};
+    public void onFail(Throwable t) {};
 
     // Обработка данных ответов не всегда должна быть реализована
-    public void onStatus405(Response<ResponseObject> response) {};
-    public void onStatus406(Response<ResponseObject> response) {};
+    public void onStatus405(MapResponseObject response) {};
+    public void onStatus406(MapResponseObject response) {};
 }
