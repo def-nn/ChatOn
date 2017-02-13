@@ -2,6 +2,7 @@ package com.app.chaton;
 
 import android.content.Intent;
 import android.graphics.Typeface;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -29,8 +30,14 @@ import javax.net.ssl.SSLContext;
 
 import retrofit2.Response;
 
+import com.google.android.vending.licensing.AESObfuscator;
+import com.google.android.vending.licensing.LicenseChecker;
+import com.google.android.vending.licensing.LicenseCheckerCallback;
+import com.google.android.vending.licensing.ServerManagedPolicy;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static final String BASE64_PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAk14k+74REn5iwz6lS1olrtbDxajS+5bpufPdVJW/VLCS11LNQb9F30nJBMfR3KIp3mjEot8Pc9C9bh2vdeUQRxZRBJFdWpODYfSLsWx58L9T8ZDE8p3kzHKD1I+B3gCxyZT0Ephyifen5Wp9NBaZsaw1NJQ+Aqpz0WxF87jgw2uA6AWLnxfxHhiUS+TaEizD7CWuEx2dT3nRidTCRDccjGfl4SxMZ4EXRew2PhK3FMqDm+0JpRj89v1yXnmgqw+ngc7T+mJw1K8SQBCiRVds1w4Cpe0vpbGZg1awewmuEeW9OVXFtGiY9ySV634m2zwFFmmsB6c8RZ8UA0d+ZuwxIQIDAQAB";
 
     Button btnSignUp, btnLogIn;
 
@@ -38,9 +45,18 @@ public class MainActivity extends AppCompatActivity {
     CallService callService;
     PreferenceHelper preferenceHelper;
 
+    private LicenseCheckerCallback mLicenseCheckerCallback;
+    private LicenseChecker mChecker;
+
+    private static final byte[] SALT = new byte[] {
+            13, -8, 56, 72, 4, -11, 121, 85, -67, -2, 24, 93, 17, -88, 119, 44, 32, -16, 98, 54
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        checkForLicense();
 
         callService = ServiceGenerator.createService(CallService.class);
         preferenceHelper = new PreferenceHelper(getSharedPreferences(
@@ -110,14 +126,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-        client.close();
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
+
+        if (mChecker != null)
+            mChecker.onDestroy();
     }
 
     private void connectToSocket() throws GeneralSecurityException,
@@ -153,5 +166,40 @@ public class MainActivity extends AppCompatActivity {
         client.setWebSocketFactory(new DefaultSSLWebSocketClientFactory(sslContext));
         client.connect();
 
+    }
+
+    private class MyLicenseCheckerCallback implements LicenseCheckerCallback {
+        public void allow(int reason) {
+            Log.d("myLogs", "allow");
+            if (isFinishing()) {
+                return;
+            }
+        }
+
+        public void dontAllow(int reason) {
+            Log.d("myLogs", "don't allow");
+            if (isFinishing()) {
+                return;
+            }
+        }
+
+        @Override
+        public void applicationError(int errorCode) {
+            Log.d("myLogs", "app error");
+
+        }
+    }
+
+    private void checkForLicense() {
+        String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+
+        mLicenseCheckerCallback = new MyLicenseCheckerCallback();
+        mChecker = new LicenseChecker(
+                this,
+                new ServerManagedPolicy(this, new AESObfuscator(SALT, getPackageName(), deviceId)),
+                BASE64_PUBLIC_KEY
+        );
+
+        mChecker.checkAccess(mLicenseCheckerCallback);
     }
 }

@@ -25,6 +25,7 @@ import com.app.chaton.API_helpers.ResponseObject;
 import com.app.chaton.API_helpers.ServiceGenerator;
 import com.app.chaton.API_helpers.User;
 import com.app.chaton.Utils.PreferenceHelper;
+import com.app.chaton.Utils.ToastHelper;
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
 
@@ -124,7 +125,7 @@ public class AuthActivity extends AppCompatActivity{
                             ((Vibrator)getSystemService(VIBRATOR_SERVICE)).vibrate(100);
                             YoYo.with(Techniques.Shake).duration(600).playOn(passInput);
                             YoYo.with(Techniques.Shake).duration(600).playOn(findViewById(R.id.iconPass));
-                            Toast.makeText(getApplicationContext(), R.string.error_pass, Toast.LENGTH_SHORT).show();
+                            ToastHelper.makeToast(R.string.error_pass);
                         }
                     });
                 }
@@ -134,7 +135,6 @@ public class AuthActivity extends AppCompatActivity{
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            emailInput.setText("");
                             passInput.setText("");
                             progressDialog.dismiss();
 
@@ -143,7 +143,7 @@ public class AuthActivity extends AppCompatActivity{
                             YoYo.with(Techniques.Shake).duration(600).playOn(passInput);
                             YoYo.with(Techniques.Shake).duration(600).playOn(findViewById(R.id.iconUser));
                             YoYo.with(Techniques.Shake).duration(600).playOn(findViewById(R.id.iconPass));
-                            Toast.makeText(getApplicationContext(), R.string.error_user, Toast.LENGTH_SHORT).show();
+                            ToastHelper.makeToast(R.string.error_user);
                         }
                     });
                 }
@@ -151,7 +151,7 @@ public class AuthActivity extends AppCompatActivity{
                 @Override
                 public void onFail(Throwable t) {
                     progressDialog.dismiss();
-                    Toast.makeText(getApplicationContext(), t.toString(), Toast.LENGTH_SHORT).show();
+                    ToastHelper.makeToast(t.toString());
                 }
             };
             helper.auth(callService, new RequestObject(user));
@@ -166,7 +166,7 @@ public class AuthActivity extends AppCompatActivity{
             YoYo.with(Techniques.Shake).duration(600).playOn(passInput);
             YoYo.with(Techniques.Shake).duration(600).playOn(findViewById(R.id.iconUser));
             YoYo.with(Techniques.Shake).duration(600).playOn(findViewById(R.id.iconPass));
-            Toast.makeText(getApplicationContext(), R.string.error_empty, Toast.LENGTH_SHORT).show();
+            ToastHelper.makeToast(R.string.error_empty);
             return false;
         }
         return true;

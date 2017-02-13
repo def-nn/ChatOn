@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ChatOn</string>
+    <string name="app_name">WeTune</string>
 
     <string name="API_BASE_URL">https://chaton.ga/api</string>
     <string name="SOCKET_URL">wss://chaton.ga/wss3/NNN:8080</string>

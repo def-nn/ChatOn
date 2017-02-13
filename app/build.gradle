@@ -30,6 +30,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:25.1.1'
     testCompile 'junit:junit:4.12'
 
+    compile project(':library')
     compile 'com.google.android.gms:play-services:10.0.1'
 
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.1'
