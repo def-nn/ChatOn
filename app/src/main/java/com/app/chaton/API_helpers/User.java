@@ -4,9 +4,6 @@ package com.app.chaton.API_helpers;
 import java.util.HashMap;
 
 public class User {
-    /**
-     *  Класс, хранящий информацию о пользователе
-     */
 
     private final static String NAME = "name";
     private final static String EMAIL = "email";

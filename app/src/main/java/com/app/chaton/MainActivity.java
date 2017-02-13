@@ -9,23 +9,33 @@ import android.view.View;
 import android.widget.Button;
 
 import com.app.chaton.API_helpers.CallService;
+import com.app.chaton.API_helpers.RequestHelper;
+import com.app.chaton.API_helpers.RequestObject;
+import com.app.chaton.API_helpers.ResponseObject;
 import com.app.chaton.API_helpers.ServiceGenerator;
 import com.app.chaton.Utils.PreferenceHelper;
-import com.app.chaton.WebSockets.WebSocketClient;
-
-import org.apache.http.message.BasicNameValuePair;
+import com.app.chaton.org.java_websocket.client.DefaultSSLWebSocketClientFactory;
+import com.app.chaton.org.java_websocket.client.WebSocketClient;
+import com.app.chaton.org.java_websocket.drafts.Draft_17;
+import com.app.chaton.org.java_websocket.handshake.ServerHandshake;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.security.ProviderInstaller;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
+import java.security.GeneralSecurityException;
+
+import javax.net.ssl.SSLContext;
+
+import retrofit2.Response;
 
 
 public class MainActivity extends AppCompatActivity {
 
     Button btnSignUp, btnLogIn;
 
-    CallService callService;
     WebSocketClient client;
+    CallService callService;
     PreferenceHelper preferenceHelper;
 
     @Override
@@ -36,15 +46,16 @@ public class MainActivity extends AppCompatActivity {
         preferenceHelper = new PreferenceHelper(getSharedPreferences(
                 getResources().getString(R.string.PREFERENCE_FILE), MODE_PRIVATE));
 
+        setContentView(R.layout.start_screen);
+
+        btnSignUp = (Button) findViewById(R.id.btnSignUp);
+        btnLogIn = (Button) findViewById(R.id.btnLogIn);
+
+        Typeface myriad = Typeface.createFromAsset(getAssets(), "fonts/MyriadPro.ttf");
+        btnSignUp.setTypeface(myriad);
+        btnLogIn.setTypeface(myriad);
+
         if (!preferenceHelper.isAuth()) {
-            setContentView(R.layout.start_screen);
-
-            btnSignUp = (Button) findViewById(R.id.btnSignUp);
-            btnLogIn = (Button) findViewById(R.id.btnLogIn);
-
-            Typeface myriad = Typeface.createFromAsset(getAssets(), "fonts/MyriadPro.ttf");
-            btnSignUp.setTypeface(myriad);
-            btnLogIn.setTypeface(myriad);
 
             btnSignUp.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -59,12 +70,49 @@ public class MainActivity extends AppCompatActivity {
                     startActivity(intent);
                 }
             });
+        } else {
+            Log.d("myLogs", preferenceHelper.getSecretKey());
+
+            btnLogIn.setVisibility(View.GONE);
+            btnSignUp.setText(R.string.logOut);
+
+            btnSignUp.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    preferenceHelper.reset();
+                    Intent intent = getIntent();
+                    finish();
+                    startActivity(intent);
+                }
+            });
+
+            Long id = preferenceHelper.getId();
+            String sk = preferenceHelper.getSecretKey();
+
+            RequestHelper requestHelper = new RequestHelper() {
+                @Override
+                public void onStatusOk(Response<ResponseObject> response) {
+                    Log.d("myLogs", "ok");
+                }
+
+                @Override
+                public void onStatusServerError(Response<ResponseObject> response) {
+                    Log.d("myLogs", "server error");
+                }
+
+                @Override
+                public void onFail(Throwable t) {
+                    Log.d("myLogs", "fail");
+                }
+            };
+            requestHelper.getDialogs(callService, new RequestObject(new Object(), id, sk), id, sk);
         }
     }
 
     @Override
-    protected void onStart() {
-        super.onRestart();
+    protected void onStop() {
+        super.onStop();
+        client.close();
     }
 
     @Override
@@ -72,14 +120,14 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-    private void connectToSocket() {
-        List<BasicNameValuePair> extraHeaders = new ArrayList<>();
-        URI uri = URI.create(getResources().getString(R.string.SOCKET_URL));
-
-        client = new WebSocketClient(uri, new WebSocketClient.Listener() {
+    private void connectToSocket() throws GeneralSecurityException,
+            GooglePlayServicesRepairableException, GooglePlayServicesNotAvailableException{
+        client = new WebSocketClient(URI.create(getResources().getString(R.string.SOCKET_URL)), new Draft_17()) {
             @Override
-            public void onConnect() {
-                Log.d("myLogs", "connected");
+            public void onOpen(ServerHandshake handshakedata) {
+                Log.d("myLogs", "opened");
+                client.send("hey");
+                client.close();
             }
 
             @Override
@@ -88,23 +136,22 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onMessage(byte[] data) {
-                Log.d("myLogs", "mess");
+            public void onClose(int code, String reason, boolean remote) {
+                Log.d("myLogs", "closed " + reason + " " + code + " " + remote);
             }
 
             @Override
-            public void onDisconnect(int code, String reason) {
-                Log.d("myLogs", "disconnected " + reason + code);
+            public void onError(Exception ex) {
+                Log.d("myLogs", "error " + ex.toString());
+                ex.printStackTrace();
             }
+        };
 
-            @Override
-            public void onError(Exception error) {
-                Log.d("myLogs", "error");
-            }
-        }, extraHeaders);
-
+        ProviderInstaller.installIfNeeded(getApplicationContext());
+        SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
+        sslContext.init(null, null, null);
+        client.setWebSocketFactory(new DefaultSSLWebSocketClientFactory(sslContext));
         client.connect();
-        client.disconnect();
-    }
 
+    }
 }

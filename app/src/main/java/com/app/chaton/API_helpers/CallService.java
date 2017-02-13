@@ -23,7 +23,7 @@ public interface CallService {
 
     @FormUrlEncoded
     @POST("./")
-    Call<List<Map>> getDialogs(@Header(HEADER_U) Long _u, @Header(HEADER_S) String secret_key,
+    Call<List<Map>> getDialogs(@Header(HEADER_U) String _u, @Header(HEADER_S) String secret_key,
                                @Field(ACT) String act, @Field(ARGS) String args);
 
 }

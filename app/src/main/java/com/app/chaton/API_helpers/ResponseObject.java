@@ -4,9 +4,6 @@ package com.app.chaton.API_helpers;
 import java.util.HashMap;
 
 public class ResponseObject {
-    /**
-     *  Объект, в который конвертируется полученный от сервера ответ
-     */
 
     private int status;
     private String answer;

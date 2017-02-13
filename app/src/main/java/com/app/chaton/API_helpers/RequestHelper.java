@@ -3,9 +3,12 @@ package com.app.chaton.API_helpers;
 
 import android.util.Log;
 
-import com.app.chaton.Utils.Encryptor;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.codec.digest.DigestUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -15,10 +18,6 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public abstract class RequestHelper {
-    /**
-     *  Реализация отправки запроса
-     *  В понедельник/воскресенье расскажу детальнее
-     */
 
     private static final String ACT_AUTH = "auth";
     private static final String ACT_GET_DIALOGS = "getDialogs";
@@ -34,8 +33,8 @@ public abstract class RequestHelper {
 
     public void auth(CallService callService, RequestObject user) {
         Call<ResponseObject> call = callService.auth(
-                Encryptor.base64(ACT_AUTH),
-                Encryptor.base64(new GsonBuilder().create().toJson(user))
+                new String(Base64.encodeBase64(ACT_AUTH.getBytes())),
+                new String(Base64.encodeBase64(new GsonBuilder().create().toJson(user).getBytes()))
         );
 
         call.enqueue(new Callback<ResponseObject>() {
@@ -66,10 +65,10 @@ public abstract class RequestHelper {
 
     public void getDialogs(CallService callService, RequestObject obj, Long _u, String secret_key) {
         Call<List<Map>> call = callService.getDialogs(
-                _u,
-                Encryptor.md5(Encryptor.sha1(Encryptor.base64(secret_key))),
-                Encryptor.base64(ACT_GET_DIALOGS),
-                Encryptor.base64(new GsonBuilder().create().toJson(obj))
+                _u.toString(),
+                encode_s(secret_key),
+                new String(Base64.encodeBase64(ACT_GET_DIALOGS.getBytes())),
+                new String(Base64.encodeBase64(new GsonBuilder().create().toJson(obj).getBytes()))
         );
 
         call.enqueue(new Callback<List<Map>>() {
@@ -93,6 +92,12 @@ public abstract class RequestHelper {
                 Log.d("myLogs", "fail: " + t.toString());
             }
         });
+    }
+
+    private String encode_s(String data) {
+        byte[] base64 = Base64.encodeBase64(data.getBytes());
+        String sha1 = new String(Hex.encodeHex(DigestUtils.sha1(base64)));
+        return new String(Hex.encodeHex(DigestUtils.md5(sha1)));
     }
 
     public abstract void onStatusOk(Response<ResponseObject> response);
