@@ -8,6 +8,15 @@
     <color name="colorSelected">#de6361</color>
     <color name="colorInputDark">#65697c</color>
     <color name="colorHint">#b2b4bc</color>
+    
+    <color name="colorMenuBg">#252931</color>
+    <color name="colorMenuBgDark">#1c2027</color>
+    <color name="colorMenuFg">#41454d</color>
+    <color name="colorMenuText">#797e86</color>
+
+    <color name="colorBorder">#373b43</color>
 
     <color name="colorWhite">#fff</color>
+    <color name="transparent">#00000000</color>
+    <color name="darkTransparent">#64000000</color>
 </resources>

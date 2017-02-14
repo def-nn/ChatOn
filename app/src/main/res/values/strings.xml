@@ -13,6 +13,7 @@
     <string name="reg">Register</string>
     <string name="email">Email</string>
     <string name="pass">Password</string>
+    <string name="search_friend">Search friend</string>
 
     <string name="error_pass">Invalid passord</string>
     <string name="error_user">User with this email does not exist</string>

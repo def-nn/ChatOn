@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fractionLayout"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorMenuBg">
+
+    <FrameLayout
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        tools:layout_editor_absoluteY="0dp"
+        tools:layout_editor_absoluteX="0dp" />
+
+    <AutoCompleteTextView android:id="@+id/autotext"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:nextFocusUp="@id/autotext"
+        android:nextFocusLeft="@id/autotext"
+        tools:layout_editor_absoluteY="0dp"
+        tools:layout_editor_absoluteX="0dp"
+        android:visibility="gone"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:text="@string/search_friend"
+        android:ems="10"
+        android:id="@+id/searchInput"
+        android:drawableLeft="@drawable/places_ic_search"
+        android:drawablePadding="24dp"
+        android:background="@color/colorMenuBgDark"
+        android:textColor="@color/colorHint"
+        android:textSize="14sp"
+        android:layout_marginBottom="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginLeft="14dp"
+        android:layout_marginRight="10dp"
+        android:paddingLeft="12dp"
+        android:paddingTop="14dp"
+        android:paddingBottom="14dp" />
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:id="@+id/imageView3"
+        android:background="@color/colorBorder"
+        android:layout_height="1dp" />
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:id="@+id/imageView4"
+        android:background="@color/colorMenuBgDark"
+        android:layout_height="1dp" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:id="@+id/progressView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical">
+
+        <ProgressBar
+            style="?android:attr/progressBarStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/dialogsList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="none"
+        android:visibility="gone"/>
+
+</LinearLayout>

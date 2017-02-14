@@ -9,15 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
-import com.app.chaton.API_helpers.CallService;
-import com.app.chaton.API_helpers.Message;
-import com.app.chaton.API_helpers.MessageResponseObject;
-import com.app.chaton.API_helpers.RequestHelper;
-import com.app.chaton.API_helpers.RequestObject;
-import com.app.chaton.API_helpers.ResponseObject;
-import com.app.chaton.API_helpers.ServiceGenerator;
 import com.app.chaton.Utils.PreferenceHelper;
-import com.app.chaton.Utils.ToastHelper;
 import com.app.chaton.org.java_websocket.client.DefaultSSLWebSocketClientFactory;
 import com.app.chaton.org.java_websocket.client.WebSocketClient;
 import com.app.chaton.org.java_websocket.drafts.Draft_17;
@@ -26,12 +18,8 @@ import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.security.ProviderInstaller;
 
-import java.io.StringReader;
 import java.net.URI;
-import java.net.UnknownHostException;
 import java.security.GeneralSecurityException;
-import java.util.HashMap;
-import java.util.List;
 
 import javax.net.ssl.SSLContext;
 
@@ -40,8 +28,6 @@ import com.google.android.vending.licensing.AESObfuscator;
 import com.google.android.vending.licensing.LicenseChecker;
 import com.google.android.vending.licensing.LicenseCheckerCallback;
 import com.google.android.vending.licensing.ServerManagedPolicy;
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -50,7 +36,6 @@ public class MainActivity extends AppCompatActivity {
     Button btnSignUp, btnLogIn;
 
     WebSocketClient client;
-    CallService callService;
     PreferenceHelper preferenceHelper;
 
     private LicenseCheckerCallback mLicenseCheckerCallback;
@@ -64,9 +49,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-//        checkForLicense();
+        checkForLicense();
 
-        callService = ServiceGenerator.createService(CallService.class);
         preferenceHelper = new PreferenceHelper(getSharedPreferences(
                 getResources().getString(R.string.PREFERENCE_FILE), MODE_PRIVATE));
 
@@ -95,11 +79,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         } else {
-            Log.d("myLogs", preferenceHelper.getSecretKey());
-
-            btnLogIn.setVisibility(View.GONE);
             btnSignUp.setText(R.string.logOut);
-
             btnSignUp.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -110,33 +90,14 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-            Long id = preferenceHelper.getId();
-            String sk = preferenceHelper.getSecretKey();
-
-            RequestHelper requestHelper = new RequestHelper() {
+            btnLogIn.setText("Dialogs");
+            btnLogIn.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onStatusOk(MessageResponseObject response) {
-
+                public void onClick(View view) {
+                    Intent intent = new Intent(MainActivity.this, DialogActivity.class);
+                    startActivity(intent);
                 }
-
-                @Override
-                public void onStatusServerError(MessageResponseObject response) {
-                    Log.d("myLogs", "server error");
-                }
-
-                @Override
-                public void onFail(Throwable t) {
-                    try {
-                        throw t;
-                    } catch (UnknownHostException e) {
-                        ToastHelper.makeToast(R.string.error_connection);
-                    } catch (Throwable e) {
-                        ToastHelper.makeToast(R.string.error_oops);
-                        e.printStackTrace();
-                    }
-                }
-            };
-            requestHelper.getDialogs(callService, new RequestObject(new Object(), id, sk), id, sk);
+            });
         }
     }
 
