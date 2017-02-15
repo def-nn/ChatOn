@@ -1,5 +1,6 @@
 package com.app.chaton.API_helpers;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
@@ -22,5 +23,4 @@ public interface CallService {
     @POST("./")
     Call<MessageResponseObject> getDialogs(@Header(HEADER_U) Long _u, @Header(HEADER_S) String secret_key,
                                            @Field(ACT) String act, @Field(ARGS) String args);
-
 }

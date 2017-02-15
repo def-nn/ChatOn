@@ -1,7 +1,5 @@
 package com.app.chaton.API_helpers;
 
-import java.util.HashMap;
-
 public class Message {
 
     private Long id;

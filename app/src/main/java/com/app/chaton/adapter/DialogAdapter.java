@@ -2,9 +2,9 @@ package com.app.chaton.adapter;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.app.chaton.API_helpers.Message;
+import com.app.chaton.DialogListFragmnet;
 import com.app.chaton.R;
 
 import java.util.List;
@@ -21,10 +22,13 @@ public class DialogAdapter extends RecyclerView.Adapter<DialogAdapter.ViewHolder
     private static final int TYPE_TO = 0;
     private static final int TYPE_FROM = 1;
 
+    private DialogListFragmnet.DialogListenerFactory dialogListenerFactory;
+
     private Context context;
     private List<Message> message_list;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
+        public ViewGroup dialogLayout;
         public TextView name, text;
         public ImageView friendImage, ownerImage, status;
 
@@ -35,24 +39,24 @@ public class DialogAdapter extends RecyclerView.Adapter<DialogAdapter.ViewHolder
             this.friendImage = (ImageView) itemView.findViewById(R.id.friendImage);
             this.ownerImage = (ImageView) itemView.findViewById(R.id.ownerImage);
             this.status = (ImageView) itemView.findViewById(R.id.friendStatus);
+            this.dialogLayout = (ConstraintLayout) itemView.findViewById(R.id.dialogItem);
         }
     }
 
-    public DialogAdapter(Context context, List<Message> message_list) {
+    public DialogAdapter(Context context, List<Message> message_list,
+                         DialogListFragmnet.DialogListenerFactory dialogListenerFactory) {
         this.context = context;
         this.message_list = message_list;
+        this.dialogListenerFactory = dialogListenerFactory;
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        Log.d("myLogs", " " + viewType);
-
         View view = (viewType == TYPE_TO) ? LayoutInflater.from(parent.getContext())
                                               .inflate(R.layout.dialog_item_to, parent, false)
                                           : LayoutInflater.from(parent.getContext())
                                               .inflate(R.layout.dialog_item_from, parent, false);
-        ViewHolder viewHolder = new ViewHolder(view);
-        return viewHolder;
+        return  new ViewHolder(view);
     }
 
     @Override
@@ -85,12 +89,13 @@ public class DialogAdapter extends RecyclerView.Adapter<DialogAdapter.ViewHolder
             dialog.text.setText(message.getBody());
 
         // TODO bind friend's profile image
+
+        dialog.dialogLayout.setOnClickListener(
+                dialogListenerFactory.createListener(message.getCompanion().getId()));
     }
 
     @Override
     public int getItemViewType(int position) {
-        Log.d("myLogs", " " + (this.message_list.get(position).to().equals(this.message_list.get(position).getCompanion().getId()) ? TYPE_TO : TYPE_FROM));
-
         return ((this.message_list.get(position).to()
                 .equals(this.message_list.get(position).getCompanion().getId())) ? TYPE_TO : TYPE_FROM);
 

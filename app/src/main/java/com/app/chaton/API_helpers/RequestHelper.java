@@ -1,6 +1,8 @@
 package com.app.chaton.API_helpers;
 
 
+import android.util.Log;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -8,6 +10,9 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 
+import java.io.IOException;
+
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -16,6 +21,7 @@ public abstract class RequestHelper {
 
     private static final String ACT_AUTH = "auth";
     private static final String ACT_GET_DIALOGS = "getDialogs";
+    private static final String ACT_GET_DIALOGS_BY_ID = "getDialogById";
 
     private final static int STATUS_OK = 200;
     private final static int STATUS_SERVER_ERROR = 500;
@@ -64,6 +70,39 @@ public abstract class RequestHelper {
                 encode_s(secret_key),
                 new String(Base64.encodeBase64(ACT_GET_DIALOGS.getBytes())),
                 new String(Base64.encodeBase64(new GsonBuilder().create().toJson(obj).getBytes()))
+        );
+
+        call.enqueue(new Callback<MessageResponseObject>() {
+            @Override
+            public void onResponse(Call<MessageResponseObject> call, Response<MessageResponseObject> response) {
+                switch (response.body().getStatus()) {
+                    case STATUS_OK:
+                        onStatusOk(response.body());
+                        break;
+                    case STATUS_SERVER_ERROR:
+                        onStatusServerError(response.body());
+                        break;
+                }
+            }
+
+            @Override
+            public void onFailure(Call<MessageResponseObject> call, Throwable t) {
+                onFail(t);
+            }
+        });
+    }
+
+    public void getDialogsById(CallService callService, Long companionId, Long _u, String secret_key) {
+        Call<MessageResponseObject> call = callService.getDialogs(
+                _u,
+                encode_s(secret_key),
+                new String(Base64.encodeBase64(ACT_GET_DIALOGS_BY_ID.getBytes())),
+                new String(Base64.encodeBase64(
+                        new GsonBuilder().create().toJson(
+                                new RequestObject(
+                                    new User(companionId), _u, secret_key)
+                                ).getBytes())
+                )
         );
 
         call.enqueue(new Callback<MessageResponseObject>() {

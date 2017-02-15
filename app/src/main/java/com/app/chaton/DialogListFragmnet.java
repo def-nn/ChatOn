@@ -1,8 +1,8 @@
 package com.app.chaton;
 
+import android.content.Context;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -14,8 +14,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
+import com.app.chaton.API_helpers.CallService;
 import com.app.chaton.API_helpers.Message;
-import com.app.chaton.Utils.ToastHelper;
+import com.app.chaton.API_helpers.MessageResponseObject;
+import com.app.chaton.API_helpers.RequestHelper;
+import com.app.chaton.API_helpers.ServiceGenerator;
+import com.app.chaton.Utils.PreferenceHelper;
 import com.app.chaton.adapter.DialogAdapter;
 import com.baoyz.widget.PullRefreshLayout;
 
@@ -34,7 +38,8 @@ public class DialogListFragmnet extends Fragment {
     private PullRefreshLayout.OnRefreshListener onRefreshListener;
 
     public void setDialogsList(List<Message> dialogsList) {
-        dialogAdapter = new DialogAdapter(getActivity().getApplicationContext(), dialogsList);
+        dialogAdapter = new DialogAdapter(getActivity().getApplicationContext(),
+                                                dialogsList, new DialogListenerFactory());
         dialogsView.setAdapter(dialogAdapter);
     }
 
@@ -90,4 +95,43 @@ public class DialogListFragmnet extends Fragment {
             }
         }
     };
+
+    public class DialogListenerFactory {
+        private CallService callService;
+        private PreferenceHelper preferenceHelper;
+
+        public DialogListenerFactory() {
+            this.callService = ServiceGenerator.createService(CallService.class);
+            this.preferenceHelper = new PreferenceHelper(getActivity().getSharedPreferences(
+                    getResources().getString(R.string.PREFERENCE_FILE), Context.MODE_PRIVATE));
+        }
+
+        public View.OnClickListener createListener(final Long companionId) {
+            return new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Log.d("myLogs", "on click " + companionId);
+                    RequestHelper requestHelper = new RequestHelper() {
+                        @Override
+                        public void onStatusOk(MessageResponseObject response) {
+                            Log.d("myLogs", "ok " + response.getData().toString());
+                        }
+
+                        @Override
+                        public void onStatusServerError(MessageResponseObject response) {
+                            Log.d("myLogs", "server error");
+                        }
+
+                        @Override
+                        public void onFail(Throwable t) {
+                            Log.d("myLogs", "fail " + t.toString());
+                            t.printStackTrace();
+                        }
+                    };
+                    requestHelper.getDialogsById(callService, companionId,
+                            preferenceHelper.getId(), preferenceHelper.getSecretKey());
+                }
+            };
+        }
+    }
 }

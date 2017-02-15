@@ -34,6 +34,11 @@ public class User {
         this._u = Long.valueOf(data.get(_U));
     }
 
+    // Используется при отправке запроса с идентефикатором пользователя
+    public User(Long id) {
+        this.id = id;
+    }
+
     public Long getId() {
         return (this._u == null) ? this.id : this._u;
     }
