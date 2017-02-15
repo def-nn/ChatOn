@@ -1,4 +1,4 @@
-package com.app.chaton;
+package com.app.chaton.ui;
 
 
 import android.graphics.Rect;
@@ -13,6 +13,8 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import com.app.chaton.R;
 
 public class ProgressDialog extends DialogFragment {
 

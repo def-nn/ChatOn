@@ -16,7 +16,7 @@ public class User {
     private String password;
     private Boolean is_admin;
     private String secret_key;
-    private Long _u;
+    private Long _u, id;
     private Long last_online;
 
     // Используется при отправке запроса на авторизацию пользователя
@@ -34,10 +34,13 @@ public class User {
         this._u = Long.valueOf(data.get(_U));
     }
 
+    public Long getId() {
+        return (this._u == null) ? this.id : this._u;
+    }
+
     public String getName() { return this.name; }
     public String getEmail() { return this.email; }
     public String getSecretKey() { return this.secret_key; }
-    public Long getId() { return this._u; }
     public boolean isAdmin() { return this.is_admin; }
     public long when_last_online() { return this.last_online; }
 

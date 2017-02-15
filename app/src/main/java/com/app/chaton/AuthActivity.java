@@ -22,16 +22,15 @@ import com.app.chaton.API_helpers.CallService;
 import com.app.chaton.API_helpers.MapResponseObject;
 import com.app.chaton.API_helpers.RequestHelper;
 import com.app.chaton.API_helpers.RequestObject;
-import com.app.chaton.API_helpers.ResponseObject;
 import com.app.chaton.API_helpers.ServiceGenerator;
 import com.app.chaton.API_helpers.User;
 import com.app.chaton.Utils.PreferenceHelper;
 import com.app.chaton.Utils.ToastHelper;
+import com.app.chaton.ui.ProgressDialog;
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
 
 import java.net.UnknownHostException;
-import java.util.HashMap;
 
 
 public class AuthActivity extends AppCompatActivity{

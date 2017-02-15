@@ -32,6 +32,7 @@
         android:text="@string/search_friend"
         android:ems="10"
         android:id="@+id/searchInput"
+        android:tag="not_edited"
         android:drawableLeft="@drawable/places_ic_search"
         android:drawablePadding="24dp"
         android:background="@color/colorMenuBgDark"
@@ -44,18 +45,6 @@
         android:paddingLeft="12dp"
         android:paddingTop="14dp"
         android:paddingBottom="14dp" />
-
-    <ImageView
-        android:layout_width="match_parent"
-        android:id="@+id/imageView3"
-        android:background="@color/colorBorder"
-        android:layout_height="1dp" />
-
-    <ImageView
-        android:layout_width="match_parent"
-        android:id="@+id/imageView4"
-        android:background="@color/colorMenuBgDark"
-        android:layout_height="1dp" />
 
     <LinearLayout
         android:orientation="vertical"
@@ -70,11 +59,35 @@
             android:layout_height="wrap_content" />
     </LinearLayout>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/dialogsList"
+    <com.baoyz.widget.PullRefreshLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scrollbars="none"
-        android:visibility="gone"/>
+        android:id="@+id/refreshDialogs">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:id="@+id/imageView3"
+                android:background="@color/colorBorder"
+                android:layout_height="1dp" />
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:id="@+id/imageView4"
+                android:background="@color/colorMenuBgDark"
+                android:layout_height="1dp" />
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/dialogsList"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scrollbars="none"
+                android:visibility="gone"/>
+        </LinearLayout>
+    </com.baoyz.widget.PullRefreshLayout>
 
 </LinearLayout>

@@ -1,11 +1,9 @@
 package com.app.chaton;
 
-import android.graphics.Color;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 
 import com.app.chaton.API_helpers.CallService;
@@ -15,9 +13,10 @@ import com.app.chaton.API_helpers.RequestObject;
 import com.app.chaton.API_helpers.ServiceGenerator;
 import com.app.chaton.Utils.PreferenceHelper;
 import com.app.chaton.Utils.ToastHelper;
+import com.baoyz.widget.PullRefreshLayout;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 
-public class DialogActivity extends AppCompatActivity{
+public class DialogActivity extends AppCompatActivity implements PullRefreshLayout.OnRefreshListener{
 
     private CallService callService;
     private PreferenceHelper preferenceHelper;
@@ -25,7 +24,7 @@ public class DialogActivity extends AppCompatActivity{
 
     private SlidingMenu rightPanel;
 
-    private RightPanelFragment rightPanelFragment;
+    private DialogListFragmnet dialogListFragmnet;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -35,22 +34,28 @@ public class DialogActivity extends AppCompatActivity{
         preferenceHelper = new PreferenceHelper(getSharedPreferences(
                 getResources().getString(R.string.PREFERENCE_FILE), MODE_PRIVATE));
 
-        rightPanelFragment = new RightPanelFragment();
+        dialogListFragmnet = new DialogListFragmnet();
+        dialogListFragmnet.setOnRefreshListener(this);
         uploadDialogsList();
 
         setContentView(R.layout.main);
 
         rightPanel = new SlidingMenu(this);
         rightPanel.setMode(SlidingMenu.RIGHT);
+        rightPanel.setFadeEnabled(true);
         rightPanel.setTouchModeAbove(SlidingMenu.TOUCHMODE_FULLSCREEN);
-        rightPanel.setTouchModeBehind(SlidingMenu.TOUCHMODE_FULLSCREEN);
         rightPanel.attachToActivity(this, SlidingMenu.SLIDING_CONTENT);
         rightPanel.setBehindOffset(120);
         rightPanel.setMenu(R.layout.menu_frame);
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.rightMenuFrame, rightPanelFragment)
+                .replace(R.id.rightMenuFrame, dialogListFragmnet)
                 .commit();
+    }
+
+    @Override
+    public void onRefresh() {
+        uploadDialogsList();
     }
 
     @Override
@@ -63,9 +68,14 @@ public class DialogActivity extends AppCompatActivity{
         requestHelper = new RequestHelper() {
             @Override
             public void onStatusOk(MessageResponseObject response) {
-                rightPanelFragment.setDialogsList(response.getData());
-                rightPanelFragment.getView().findViewById(R.id.dialogsList).setVisibility(View.VISIBLE);
-                rightPanelFragment.getView().findViewById(R.id.progressView).setVisibility(View.GONE);
+                try {
+                    dialogListFragmnet.stopProgress();
+                } catch (NullPointerException e) {
+                    Log.d("myLogs", "stoppping null");
+                }
+                dialogListFragmnet.setDialogsList(response.getData());
+                dialogListFragmnet.getView().findViewById(R.id.dialogsList).setVisibility(View.VISIBLE);
+                dialogListFragmnet.getView().findViewById(R.id.progressView).setVisibility(View.GONE);
             }
 
             @Override
