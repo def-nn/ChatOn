@@ -50,14 +50,14 @@ public class ChatActivity extends AppCompatActivity{
 
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         btnSend = (Button) findViewById(R.id.btnSend);
-        btnConfig = (ImageButton) findViewById(R.id.btnConfig);
-        btnFriendList = (ImageButton) findViewById(R.id.btnFriendsList);
+//        btnConfig = (ImageButton) findViewById(R.id.btnConfig);
+//        btnFriendList = (ImageButton) findViewById(R.id.btnFriendsList);
         btnAttach = (ImageButton) findViewById(R.id.btnAttach);
         messInput = (EditText) findViewById(R.id.messInput);
-        TextView tvChat = (TextView) findViewById(R.id.tvChat);
+//        TextView tvChat = (TextView) findViewById(R.id.tvChat);
 
         Typeface myriad = Typeface.createFromAsset(getAssets(), "fonts/MyriadPro.ttf");
-        tvChat.setTypeface(myriad);
+//        tvChat.setTypeface(myriad);
         btnSend.setTypeface(myriad);
         messInput.setTypeface(myriad);
 
