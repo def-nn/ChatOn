@@ -25,8 +25,9 @@
         <activity
             android:name=".AuthActivity"
             android:windowSoftInputMode="adjustResize"/>
-        <activity android:name=".DialogActivity"
-            android:theme="@style/AppTheme.ActionBar.Transparent"/>
+        <activity android:name=".DialogActivity"/>
+        <activity android:name=".ChatActivity"
+            android:windowSoftInputMode="adjustPan"/>
     </application>
 
 </manifest>

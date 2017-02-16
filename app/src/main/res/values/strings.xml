@@ -9,11 +9,16 @@
     <string name="signUp">Sign up</string>
     <string name="logIn">Log in</string>
     <string name="logOut">Log out</string>
+    <string name="chat">Chat</string>
 
     <string name="reg">Register</string>
     <string name="email">Email</string>
     <string name="pass">Password</string>
     <string name="search_friend">Search friend</string>
+    <string name="send">Send</string>
+
+    <string name="hintMess">Message...</string>
+    <string name="hintPass">Password?</string>
 
     <string name="error_pass">Invalid passord</string>
     <string name="error_user">User with this email does not exist</string>

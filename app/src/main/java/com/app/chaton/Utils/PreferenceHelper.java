@@ -11,7 +11,7 @@ public class PreferenceHelper {
     private final static String EMAIL = "email";
     private final static String IS_ADMIN = "is_admin";
     private final static String SECRET_KEY = "secret_key";
-    private final static String ID = "id";
+    public final static String ID = "id";
 
     private SharedPreferences preferences;
 

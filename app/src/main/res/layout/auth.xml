@@ -162,7 +162,7 @@
         app:layout_constraintLeft_toLeftOf="@+id/emailInput" />
 
     <TextView
-        android:text="@string/pass"
+        android:text="@string/hintPass"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/tvPass"

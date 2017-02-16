@@ -37,7 +37,6 @@ public class AuthActivity extends AppCompatActivity{
 
     private static final String NOT_EDITED = "not_edited";
     private static final String EDITED = "edited";
-    private static final String NOT_VALID = "not_valid";
 
     ViewGroup rootView;
     EditText emailInput, passInput;
