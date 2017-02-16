@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/colorPrimary"
+    android:elevation="4dp">
+
+    <ImageButton
+        android:layout_height="match_parent"
+        app:srcCompat="@drawable/settings"
+        android:id="@+id/btnConfig"
+        android:tint="@color/colorWhite"
+        android:layout_width="0dp"
+        android:layout_weight="0.1"
+        android:background="@color/transparent"
+        android:scaleType="fitCenter"
+        android:paddingLeft="12dp"
+        android:paddingEnd="8dp"
+        android:paddingRight="8dp"
+        android:paddingStart="12dp" />
+
+    <TextView
+        android:layout_width="0dp"
+        android:layout_weight="0.8"
+        android:layout_height="match_parent"
+        android:textSize="18sp"
+        android:textColor="@color/colorWhite"
+        android:id="@+id/actionBarTitle"
+        android:gravity="center"/>
+
+    <ImageButton
+        android:layout_height="match_parent"
+        app:srcCompat="@drawable/ic_friend_list"
+        android:id="@+id/btnFriendList"
+        android:layout_width="0dp"
+        android:layout_weight="0.1"
+        android:background="@color/transparent"
+        android:scaleType="fitCenter"
+        android:paddingStart="6dp"
+        android:paddingRight="12dp"
+        android:paddingLeft="6dp"
+        android:paddingEnd="12dp" />
+
+</LinearLayout>

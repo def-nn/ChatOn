@@ -3,8 +3,11 @@ package com.app.chaton;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.os.PersistableBundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -18,6 +21,7 @@ import com.app.chaton.API_helpers.MessageResponseObject;
 import com.app.chaton.API_helpers.RequestHelper;
 import com.app.chaton.API_helpers.ServiceGenerator;
 import com.app.chaton.Utils.PreferenceHelper;
+import com.app.chaton.adapter.ChatAdapter;
 
 public class ChatActivity extends AppCompatActivity{
 
@@ -25,11 +29,18 @@ public class ChatActivity extends AppCompatActivity{
     private static final String EDITED = "edited";
 
     private Long companionId;
+    private String companionName;
 
+    private ActionBar actionBar;
     private Button btnSend;
-    private ImageButton btnConfig, btnFriendList, btnAttach;
+    private ImageButton btnAttach;
     private EditText messInput;
     private ProgressBar progressBar;
+    private RecyclerView chatView;
+    private TextView tvNoMess;
+
+    private LinearLayoutManager chatManager;
+    private ChatAdapter chatAdapter;
 
     CallService callService;
     PreferenceHelper preferenceHelper;
@@ -45,21 +56,33 @@ public class ChatActivity extends AppCompatActivity{
 
         Intent intent = getIntent();
         companionId = intent.getLongExtra(PreferenceHelper.ID, 0);
+        companionName = intent.getStringExtra(PreferenceHelper.NAME);
+
+        chatView = (RecyclerView) findViewById(R.id.chatView);
+        chatView.setHasFixedSize(false);
+
+        chatManager = new LinearLayoutManager(getApplicationContext());
+        chatManager.setStackFromEnd(true);
+        chatView.setLayoutManager(chatManager);
+
+        tvNoMess = (TextView) findViewById(R.id.tvNoMess);
 
         uploadData();
 
+        setActionBar();
+
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         btnSend = (Button) findViewById(R.id.btnSend);
-//        btnConfig = (ImageButton) findViewById(R.id.btnConfig);
-//        btnFriendList = (ImageButton) findViewById(R.id.btnFriendsList);
         btnAttach = (ImageButton) findViewById(R.id.btnAttach);
         messInput = (EditText) findViewById(R.id.messInput);
-//        TextView tvChat = (TextView) findViewById(R.id.tvChat);
+
+        TextView actionBarTitle = (TextView) actionBar.getCustomView().findViewById(R.id.actionBarTitle);
+        actionBarTitle.setText(R.string.chat);
 
         Typeface myriad = Typeface.createFromAsset(getAssets(), "fonts/MyriadPro.ttf");
-//        tvChat.setTypeface(myriad);
         btnSend.setTypeface(myriad);
         messInput.setTypeface(myriad);
+        actionBarTitle.setTypeface(myriad);
 
         messInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -79,11 +102,29 @@ public class ChatActivity extends AppCompatActivity{
 
     }
 
+    private void setActionBar() {
+        actionBar = getSupportActionBar();
+
+        actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        actionBar.setCustomView(R.layout.custom_toolbar);
+
+        Toolbar toolbar=(Toolbar) actionBar.getCustomView().getParent();
+        toolbar.setContentInsetsAbsolute(0, 0);
+        toolbar.getContentInsetEnd();
+        toolbar.setPadding(0, 0, 0, 0);
+    }
+
     private void uploadData() {
         RequestHelper requestHelper = new RequestHelper() {
             @Override
             public void onStatusOk(MessageResponseObject response) {
-                Log.d("myLogs", "ok " + response.getData().toString());
+                if (response.getData().size() != 0) {
+                    chatAdapter = new ChatAdapter(getApplicationContext(), response.getData(),
+                            preferenceHelper.getName(),  companionName);
+                    chatView.setAdapter(chatAdapter);
+                } else
+                    tvNoMess.setVisibility(View.VISIBLE);
+
                 progressBar.setVisibility(View.GONE);
             }
 

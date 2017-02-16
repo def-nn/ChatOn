@@ -93,12 +93,13 @@ public class DialogListFragmnet extends Fragment {
     };
 
     public class DialogListenerFactory {
-        public View.OnClickListener createListener(final Long companionId) {
+        public View.OnClickListener createListener(final Long companionId, final String companionName) {
             return new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     Intent intent = new Intent(getActivity(), ChatActivity.class);
                     intent.putExtra(PreferenceHelper.ID, companionId);
+                    intent.putExtra(PreferenceHelper.NAME, companionName);
                     startActivity(intent);
                 }
             };

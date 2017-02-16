@@ -16,6 +16,7 @@
     <string name="pass">Password</string>
     <string name="search_friend">Search friend</string>
     <string name="send">Send</string>
+    <string name="me">Me</string>
 
     <string name="hintMess">Message...</string>
     <string name="hintPass">Password?</string>
@@ -25,6 +26,8 @@
     <string name="error_empty">Please fill all fields</string>
     <string name="error_connection">Check your internet connection</string>
     <string name="error_oops">Oops, something went wrong. Please, try again</string>
+
+    <string name="no_mess">Start conversation with this user right now</string>
 
     <string name="progress">Loading data</string>
 </resources>

@@ -7,7 +7,7 @@ import com.app.chaton.API_helpers.User;
 public class PreferenceHelper {
 
     private final static String IS_AUTH = "is_auth";
-    private final static String NAME = "name";
+    public final static String NAME = "name";
     private final static String EMAIL = "email";
     private final static String IS_ADMIN = "is_admin";
     private final static String SECRET_KEY = "secret_key";

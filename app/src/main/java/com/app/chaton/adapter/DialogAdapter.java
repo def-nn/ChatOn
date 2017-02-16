@@ -19,9 +19,6 @@ import java.util.List;
 
 public class DialogAdapter extends RecyclerView.Adapter<DialogAdapter.ViewHolder>{
 
-    private static final int TYPE_TO = 0;
-    private static final int TYPE_FROM = 1;
-
     private DialogListFragmnet.DialogListenerFactory dialogListenerFactory;
 
     private Context context;
@@ -52,7 +49,7 @@ public class DialogAdapter extends RecyclerView.Adapter<DialogAdapter.ViewHolder
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = (viewType == TYPE_TO) ? LayoutInflater.from(parent.getContext())
+        View view = (viewType == Message.TYPE_TO) ? LayoutInflater.from(parent.getContext())
                                               .inflate(R.layout.dialog_item_to, parent, false)
                                           : LayoutInflater.from(parent.getContext())
                                               .inflate(R.layout.dialog_item_from, parent, false);
@@ -74,7 +71,7 @@ public class DialogAdapter extends RecyclerView.Adapter<DialogAdapter.ViewHolder
         dialog.text.setTypeface(myriad);
         dialog.name.setTypeface(myriad);
 
-        if (dialog.getItemViewType() == TYPE_TO) {
+        if (dialog.getItemViewType() == Message.TYPE_TO) {
             if (message.getBody().length() > 25)
                 dialog.text.setText(message.getBody().substring(0, 23).concat("..."));
             else
@@ -91,18 +88,16 @@ public class DialogAdapter extends RecyclerView.Adapter<DialogAdapter.ViewHolder
         // TODO bind friend's profile image
 
         dialog.dialogLayout.setOnClickListener(
-                dialogListenerFactory.createListener(message.getCompanion().getId()));
+                dialogListenerFactory.createListener(message.getCompanion().getId(),
+                                                     message.getCompanion().getName()));
     }
 
     @Override
     public int getItemViewType(int position) {
-        return ((this.message_list.get(position).to()
-                .equals(this.message_list.get(position).getCompanion().getId())) ? TYPE_TO : TYPE_FROM);
+        return this.message_list.get(position).getType();
 
     }
 
     @Override
-    public int getItemCount() {
-        return this.message_list.size();
-    }
+    public int getItemCount() { return this.message_list.size(); }
 }

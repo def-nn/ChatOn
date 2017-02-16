@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingStart="8dp"
+    android:paddingLeft="8dp"
+    android:layout_marginTop="6dp"
+    android:layout_marginBottom="8dp">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/messImage"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:src="@drawable/user_m"
+        android:layout_gravity="bottom"
+        android:layout_marginRight="8dp"
+        android:layout_marginEnd="8dp" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/message"
+        android:paddingTop="8dp"
+        android:paddingBottom="10dp"
+        android:paddingRight="16dp"
+        android:paddingLeft="16dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorDarkGray"
+            android:id="@+id/messName"
+            android:maxWidth="256dp"
+            android:textSize="14sp"
+            android:text="Friend name"
+            android:textStyle="normal|bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorDarkGray"
+            android:id="@+id/messBody"
+            android:maxWidth="240dp"
+            android:textSize="12sp"
+            android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit ipsum dolor sit amet."
+            android:layout_marginTop="2dp" />
+
+    </LinearLayout>
+
+</LinearLayout>

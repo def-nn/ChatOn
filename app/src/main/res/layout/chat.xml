@@ -7,13 +7,22 @@
     android:layout_height="match_parent"
     android:background="@color/colorPrimaryDark">
 
-    <ProgressBar
-        style="?android:attr/progressBarStyle"
-        android:layout_width="wrap_content"
+    <FrameLayout
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        tools:layout_editor_absoluteY="0dp"
+        tools:layout_editor_absoluteX="0dp" />
+
+    <AutoCompleteTextView android:id="@+id/autotext"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:id="@+id/progressBar"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"/>
+        android:nextFocusUp="@id/autotext"
+        android:nextFocusLeft="@id/autotext"
+        tools:layout_editor_absoluteY="0dp"
+        tools:layout_editor_absoluteX="0dp"
+        android:visibility="gone"/>
 
     <LinearLayout
         android:orientation="horizontal"
@@ -79,6 +88,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:id="@+id/btnSend" />
+
         </LinearLayout>
 
     </LinearLayout>
@@ -93,5 +103,23 @@
         android:id="@+id/chatView">
 
     </android.support.v7.widget.RecyclerView>
+
+    <ProgressBar
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/progressBar"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"/>
+
+    <TextView
+        android:text="@string/no_mess"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorDarkGray"
+        android:id="@+id/tvNoMess"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:visibility="gone"/>
 
 </RelativeLayout>
