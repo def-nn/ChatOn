@@ -188,6 +188,20 @@ public class AuthActivity extends AppCompatActivity{
         }
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("email", emailInput.getText().toString());
+        outState.putString("pass", passInput.getText().toString());
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        emailInput.setText(savedInstanceState.getString("email"));
+        passInput.setText(savedInstanceState.getString("pass"));
+    }
+
     View.OnFocusChangeListener onFocusChangeListener = new View.OnFocusChangeListener() {
         @Override
         public void onFocusChange(View view, boolean hasFocus) {

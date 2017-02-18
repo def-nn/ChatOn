@@ -12,14 +12,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.app.chaton.API_helpers.Message;
-import com.app.chaton.DialogListFragmnet;
+import com.app.chaton.DialogActivity;
 import com.app.chaton.R;
 
 import java.util.List;
 
 public class DialogAdapter extends RecyclerView.Adapter<DialogAdapter.ViewHolder>{
 
-    private DialogListFragmnet.DialogListenerFactory dialogListenerFactory;
+    private DialogActivity.DialogListenerFactory dialogListenerFactory;
 
     private Context context;
     private List<Message> message_list;
@@ -41,7 +41,7 @@ public class DialogAdapter extends RecyclerView.Adapter<DialogAdapter.ViewHolder
     }
 
     public DialogAdapter(Context context, List<Message> message_list,
-                         DialogListFragmnet.DialogListenerFactory dialogListenerFactory) {
+                         DialogActivity.DialogListenerFactory dialogListenerFactory) {
         this.context = context;
         this.message_list = message_list;
         this.dialogListenerFactory = dialogListenerFactory;
@@ -100,4 +100,6 @@ public class DialogAdapter extends RecyclerView.Adapter<DialogAdapter.ViewHolder
 
     @Override
     public int getItemCount() { return this.message_list.size(); }
+
+    public List<Message> getMessageList() { return this.message_list; }
 }

@@ -1,9 +1,12 @@
 package com.app.chaton.API_helpers;
 
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.HashMap;
 
-public class User {
+public class User implements Parcelable{
 
     private final static String NAME = "name";
     private final static String EMAIL = "email";
@@ -49,4 +52,43 @@ public class User {
     public boolean isAdmin() { return this.is_admin; }
     public long when_last_online() { return this.last_online; }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(name);
+        parcel.writeString(email);
+        parcel.writeString(password);
+        parcel.writeByte((byte) (is_admin ? 1 : 0));
+        parcel.writeString(secret_key);
+        parcel.writeLong((_u != null) ? _u : 0);
+        parcel.writeLong(id);
+        parcel.writeLong(last_online);
+    }
+
+    private User(Parcel parcel) {
+        name = parcel.readString();
+        email = parcel.readString();
+        password = parcel.readString();
+        is_admin = parcel.readByte() != 0;
+        secret_key = parcel.readString();
+        _u = parcel.readLong();
+        id = parcel.readLong();
+        last_online = parcel.readLong();
+    }
+
+    public static final Creator<User> CREATOR = new Creator<User>() {
+        @Override
+        public User createFromParcel(Parcel in) {
+            return new User(in);
+        }
+
+        @Override
+        public User[] newArray(int size) {
+            return new User[size];
+        }
+    };
 }
