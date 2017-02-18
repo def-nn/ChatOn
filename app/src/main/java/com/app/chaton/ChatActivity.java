@@ -17,11 +17,15 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.app.chaton.API_helpers.CallService;
+import com.app.chaton.API_helpers.Message;
 import com.app.chaton.API_helpers.MessageResponseObject;
 import com.app.chaton.API_helpers.RequestHelper;
 import com.app.chaton.API_helpers.ServiceGenerator;
 import com.app.chaton.Utils.PreferenceHelper;
 import com.app.chaton.adapter.ChatAdapter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ChatActivity extends AppCompatActivity{
 
@@ -30,6 +34,7 @@ public class ChatActivity extends AppCompatActivity{
 
     private Long companionId;
     private String companionName;
+    private boolean isDataUploaded;
 
     private ActionBar actionBar;
     private Button btnSend;
@@ -66,12 +71,15 @@ public class ChatActivity extends AppCompatActivity{
         chatView.setLayoutManager(chatManager);
 
         tvNoMess = (TextView) findViewById(R.id.tvNoMess);
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
 
-        uploadData();
+        if (savedInstanceState == null || !savedInstanceState.getBoolean("isDataUploaded"))
+            uploadData();
+        else
+            showMessages((List<Message>) savedInstanceState.getSerializable("messageList"));
 
         setActionBar();
 
-        progressBar = (ProgressBar) findViewById(R.id.progressBar);
         btnSend = (Button) findViewById(R.id.btnSend);
         btnAttach = (ImageButton) findViewById(R.id.btnAttach);
         messInput = (EditText) findViewById(R.id.messInput);
@@ -102,6 +110,21 @@ public class ChatActivity extends AppCompatActivity{
 
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("mess", messInput.getText().toString());
+        outState.putBoolean("isDataUploaded", isDataUploaded);
+        if (isDataUploaded)
+            outState.putSerializable("messageList", new ArrayList<>(chatAdapter.getMessageList()));
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        messInput.setText(savedInstanceState.getString("mess"));
+    }
+
     private void setActionBar() {
         actionBar = getSupportActionBar();
 
@@ -114,18 +137,23 @@ public class ChatActivity extends AppCompatActivity{
         toolbar.setPadding(0, 0, 0, 0);
     }
 
+    private void showMessages(List<Message> messageList) {
+        isDataUploaded = true;
+
+        if (messageList.size() != 0) {
+            chatAdapter = new ChatAdapter(getApplicationContext(), messageList,
+                    preferenceHelper.getName(),  companionName);
+            chatView.setAdapter(chatAdapter);
+        } else
+            tvNoMess.setVisibility(View.VISIBLE);
+        progressBar.setVisibility(View.GONE);
+    }
+
     private void uploadData() {
         RequestHelper requestHelper = new RequestHelper() {
             @Override
             public void onStatusOk(MessageResponseObject response) {
-                if (response.getData().size() != 0) {
-                    chatAdapter = new ChatAdapter(getApplicationContext(), response.getData(),
-                            preferenceHelper.getName(),  companionName);
-                    chatView.setAdapter(chatAdapter);
-                } else
-                    tvNoMess.setVisibility(View.VISIBLE);
-
-                progressBar.setVisibility(View.GONE);
+                showMessages(response.getData());
             }
 
             @Override

@@ -17,6 +17,7 @@
     <string name="search_friend">Search friend</string>
     <string name="send">Send</string>
     <string name="me">Me</string>
+    <string name="yesterday">yesterday</string>
 
     <string name="hintMess">Message...</string>
     <string name="hintPass">Password?</string>
