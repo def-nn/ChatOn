@@ -3,9 +3,20 @@ package com.app.chaton.API_helpers;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.HashMap;
+
 public class Message implements Parcelable{
     public static final int TYPE_TO = 0;
     public static final int TYPE_FROM = 1;
+
+    public static final String ID = "id";
+    public static final String OWNER = "owner";
+    public static final String COMPANION = "companion";
+    public static final String RECEIVER = "receiver";
+    public static final String MESSAGE = "message";
+    public static final String VIEWED = "viewed";
+    public static final String CREATED_AT = "created_at";
+    public static final String USERNAME = "username";
 
     private Long id;
     private Long owner;
@@ -15,6 +26,16 @@ public class Message implements Parcelable{
     private Long viewed;
     private Long created_at;
     private User username;
+
+    public Message(HashMap<String, Object> data) {
+        this.id = (Long) data.get(ID);
+        this.owner = (Long) data.get(OWNER);
+        this.receiver = (Long) data.get(RECEIVER);
+        this.message = (String) data.get(MESSAGE);
+        // TODO
+    }
+
+    public void setCompanion(Long companion) { this.companion = companion; }
 
     public long getId() { return this.id; }
     public User getCompanion() { return this.username; }

@@ -82,6 +82,12 @@ public class DialogActivity extends AppCompatActivity implements PullRefreshLayo
     }
 
     @Override
+    protected void onRestart() {
+        super.onRestart();
+        uploadDialogsList();
+    }
+
+    @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean("isDataUploaded", isDataUploaded);

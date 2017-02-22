@@ -8,6 +8,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -21,13 +23,15 @@ import com.app.chaton.API_helpers.Message;
 import com.app.chaton.API_helpers.MessageResponseObject;
 import com.app.chaton.API_helpers.RequestHelper;
 import com.app.chaton.API_helpers.ServiceGenerator;
+import com.app.chaton.sockets.SocketHelper;
 import com.app.chaton.Utils.PreferenceHelper;
 import com.app.chaton.adapter.ChatAdapter;
+import com.app.chaton.sockets.SocketListener;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ChatActivity extends AppCompatActivity{
+public class ChatActivity extends AppCompatActivity implements SocketListener{
 
     private static final String NOT_EDITED = "not_edited";
     private static final String EDITED = "edited";
@@ -47,8 +51,9 @@ public class ChatActivity extends AppCompatActivity{
     private LinearLayoutManager chatManager;
     private ChatAdapter chatAdapter;
 
-    CallService callService;
-    PreferenceHelper preferenceHelper;
+    private CallService callService;
+    private PreferenceHelper preferenceHelper;
+    private SocketHelper socketHelper;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -59,12 +64,15 @@ public class ChatActivity extends AppCompatActivity{
         preferenceHelper = new PreferenceHelper(getSharedPreferences(
                 getResources().getString(R.string.PREFERENCE_FILE), MODE_PRIVATE));
 
+        socketHelper = ((WeTuneApplication) getApplication()).getSocketHelper();
+        socketHelper.setSocketListener(this);
+
         Intent intent = getIntent();
         companionId = intent.getLongExtra(PreferenceHelper.ID, 0);
         companionName = intent.getStringExtra(PreferenceHelper.NAME);
 
         chatView = (RecyclerView) findViewById(R.id.chatView);
-        chatView.setHasFixedSize(false);
+        chatView.setHasFixedSize(true);
 
         chatManager = new LinearLayoutManager(getApplicationContext());
         chatManager.setStackFromEnd(true);
@@ -85,9 +93,9 @@ public class ChatActivity extends AppCompatActivity{
         messInput = (EditText) findViewById(R.id.messInput);
 
         TextView actionBarTitle = (TextView) actionBar.getCustomView().findViewById(R.id.actionBarTitle);
-        actionBarTitle.setText(R.string.chat);
+        actionBarTitle.setText(companionName);
 
-        Typeface myriad = Typeface.createFromAsset(getAssets(), "fonts/MyriadPro.ttf");
+        final Typeface myriad = Typeface.createFromAsset(getAssets(), "fonts/MyriadPro.ttf");
         btnSend.setTypeface(myriad);
         messInput.setTypeface(myriad);
         actionBarTitle.setTypeface(myriad);
@@ -107,7 +115,24 @@ public class ChatActivity extends AppCompatActivity{
                 }
             }
         });
+        messInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                socketHelper.notifyTyping(companionId);
+            }
 
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+            @Override
+            public void afterTextChanged(Editable editable) {}
+        });
+
+        btnSend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                socketHelper.send(companionId, messInput.getText().toString());
+            }
+        });
     }
 
     @Override
@@ -170,4 +195,22 @@ public class ChatActivity extends AppCompatActivity{
         requestHelper.getDialogsById(callService, companionId,
                 preferenceHelper.getId(), preferenceHelper.getSecretKey());
     }
+
+    @Override
+    public void onMessageReceived(final Message message) {
+        message.setCompanion(companionId);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                chatAdapter.getMessageList().add(message);
+                chatAdapter.notifyItemInserted(chatAdapter.getItemCount() - 1);
+                chatManager.scrollToPosition(chatAdapter.getItemCount() - 1);
+
+                messInput.setText("");
+            }
+        });
+        Log.d("myLogs", message.getBody());
+    }
+
+    public Long getCompanionId() { return this.companionId; }
 }

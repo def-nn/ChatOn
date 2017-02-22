@@ -10,24 +10,12 @@ import android.view.View;
 import android.widget.Button;
 
 import com.app.chaton.Utils.PreferenceHelper;
-import com.app.chaton.org.java_websocket.client.DefaultSSLWebSocketClientFactory;
-import com.app.chaton.org.java_websocket.client.WebSocketClient;
-import com.app.chaton.org.java_websocket.drafts.Draft_17;
-import com.app.chaton.org.java_websocket.handshake.ServerHandshake;
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
-import com.google.android.gms.common.GooglePlayServicesRepairableException;
-import com.google.android.gms.security.ProviderInstaller;
-
-import java.net.URI;
-import java.security.GeneralSecurityException;
-
-import javax.net.ssl.SSLContext;
-
 
 import com.google.android.vending.licensing.AESObfuscator;
 import com.google.android.vending.licensing.LicenseChecker;
 import com.google.android.vending.licensing.LicenseCheckerCallback;
 import com.google.android.vending.licensing.ServerManagedPolicy;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -35,7 +23,6 @@ public class MainActivity extends AppCompatActivity {
 
     Button btnSignUp, btnLogIn;
 
-    WebSocketClient client;
     PreferenceHelper preferenceHelper;
 
     private LicenseCheckerCallback mLicenseCheckerCallback;
@@ -79,6 +66,9 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         } else {
+            ((WeTuneApplication) getApplication()).connectToSocket(preferenceHelper.getId(),
+                    preferenceHelper.getSecretKey());
+
             btnSignUp.setText(R.string.logOut);
             btnSignUp.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -107,41 +97,6 @@ public class MainActivity extends AppCompatActivity {
 
         if (mChecker != null)
             mChecker.onDestroy();
-    }
-
-    private void connectToSocket() throws GeneralSecurityException,
-            GooglePlayServicesRepairableException, GooglePlayServicesNotAvailableException{
-        client = new WebSocketClient(URI.create(getResources().getString(R.string.SOCKET_URL)), new Draft_17()) {
-            @Override
-            public void onOpen(ServerHandshake handshakedata) {
-                Log.d("myLogs", "opened");
-                client.send("hey");
-                client.close();
-            }
-
-            @Override
-            public void onMessage(String message) {
-                Log.d("myLogs", "mess " + message);
-            }
-
-            @Override
-            public void onClose(int code, String reason, boolean remote) {
-                Log.d("myLogs", "closed " + reason + " " + code + " " + remote);
-            }
-
-            @Override
-            public void onError(Exception ex) {
-                Log.d("myLogs", "error " + ex.toString());
-                ex.printStackTrace();
-            }
-        };
-
-        ProviderInstaller.installIfNeeded(getApplicationContext());
-        SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
-        sslContext.init(null, null, null);
-        client.setWebSocketFactory(new DefaultSSLWebSocketClientFactory(sslContext));
-        client.connect();
-
     }
 
     private class MyLicenseCheckerCallback implements LicenseCheckerCallback {

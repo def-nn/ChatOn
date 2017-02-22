@@ -125,7 +125,7 @@ public abstract class RequestHelper {
         });
     }
 
-    private String encode_s(String data) {
+    public static String encode_s(String data) {
         byte[] base64 = Base64.encodeBase64(data.getBytes());
         String sha1 = new String(Hex.encodeHex(DigestUtils.sha1(base64)));
         return new String(Hex.encodeHex(DigestUtils.md5(sha1)));

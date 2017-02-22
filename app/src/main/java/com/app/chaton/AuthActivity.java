@@ -104,6 +104,9 @@ public class AuthActivity extends AppCompatActivity{
                     User user = new User(response.getData());
                     preferenceHelper.authUser(user);
 
+                    ((WeTuneApplication) getApplication()).connectToSocket(preferenceHelper.getId(),
+                            preferenceHelper.getSecretKey());
+
                     progressDialog.dismiss();
                     Intent intent = new Intent(AuthActivity.this, MainActivity.class);
                     startActivity(intent);
