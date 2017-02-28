@@ -206,6 +206,8 @@ public class AuthActivity extends AppCompatActivity{
         super.onSaveInstanceState(outState);
         outState.putString("email", emailInput.getText().toString());
         outState.putString("pass", passInput.getText().toString());
+        outState.putString("email_tag", emailInput.getTag().toString());
+        outState.putString("pass_tag", passInput.getTag().toString());
     }
 
     @Override
@@ -213,6 +215,8 @@ public class AuthActivity extends AppCompatActivity{
         super.onRestoreInstanceState(savedInstanceState);
         emailInput.setText(savedInstanceState.getString("email"));
         passInput.setText(savedInstanceState.getString("pass"));
+        emailInput.setTag(savedInstanceState.getString("email_tag"));
+        passInput.setTag(savedInstanceState.getString("pass_tag"));
     }
 
     View.OnFocusChangeListener onFocusChangeListener = new View.OnFocusChangeListener() {

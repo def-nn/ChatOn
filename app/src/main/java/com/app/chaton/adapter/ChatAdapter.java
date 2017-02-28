@@ -24,13 +24,14 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView messName, messBody;
-        public ImageView messImage;
+        public ImageView messImage, messViewed;
 
         public ViewHolder(View itemView) {
             super(itemView);
             messName = (TextView) itemView.findViewById(R.id.messName);
             messBody = (TextView) itemView.findViewById(R.id.messBody);
             messImage = (ImageView) itemView.findViewById(R.id.messImage);
+            messViewed = (ImageView) itemView.findViewById(R.id.icNotViewed);
         }
     }
 
@@ -59,6 +60,8 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
 
         if (message_view.getItemViewType() == Message.TYPE_TO) {
             message_view.messName.setText(myName);
+
+            if (!message.isViewed()) message_view.messViewed.setVisibility(View.VISIBLE);
             new ImageDownloader(context, myAvatar) {
                 @Override
                 protected void onPostExecute(byte[] bm_data) {

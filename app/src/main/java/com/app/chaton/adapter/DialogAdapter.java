@@ -137,18 +137,13 @@ public class DialogAdapter extends RecyclerView.Adapter<DialogAdapter.ViewHolder
         Date creation_date = new Date(created_at * 1000);
         long time_diff = new Date().getTime() - creation_date.getTime();
 
-        Log.d("myLogs", "date " + new Date().getTime() + " " + creation_date.getTime());
-
         if (time_diff < DAY_MILLS) {
-            Log.d("myLogs", "date1 " + timePattern.format(creation_date));
             return timePattern.format(creation_date);
         }
         else if (time_diff < DAY_MILLS * 2) {
-            Log.d("myLogs", "date2 " + activity.getResources().getString(R.string.yesterday));
             return activity.getResources().getString(R.string.yesterday);
         }
         else {
-            Log.d("myLogs", "date3 " + datePattern.format(creation_date));
             return datePattern.format(creation_date);
         }
     }

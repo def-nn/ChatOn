@@ -44,7 +44,7 @@ public class Message implements Parcelable{
     public Long to() { return this.receiver; }
 
     public String getBody() { return this.message; }
-    public boolean isViewed() { return this.viewed != 0; }
+    public boolean isViewed() { return (this.viewed != null && this.viewed != 0); }
 
     public long createdAt() { return this.created_at; }
 
