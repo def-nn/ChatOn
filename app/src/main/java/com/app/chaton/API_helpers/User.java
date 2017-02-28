@@ -3,6 +3,7 @@ package com.app.chaton.API_helpers;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.Nullable;
 
 import java.util.HashMap;
 
@@ -21,11 +22,13 @@ public class User implements Parcelable{
     private String secret_key;
     private Long _u, id;
     private Long last_online;
+    private String avatar;
 
     // Используется при отправке запроса на авторизацию пользователя
-    public User(String email, String password) {
+    public User(String email, @Nullable String password, @Nullable String secret_key) {
         this.email = email;
-        this.password = password;
+        if (password != null) this.password = password;
+        else this.secret_key = secret_key;
     }
 
     // Используется при получении ответа от сервера (в виде ассоциативного массива)
@@ -49,6 +52,7 @@ public class User implements Parcelable{
     public String getName() { return this.name; }
     public String getEmail() { return this.email; }
     public String getSecretKey() { return this.secret_key; }
+    public String getAvatar() { return this.avatar; }
     public boolean isAdmin() { return this.is_admin; }
     public long when_last_online() { return this.last_online; }
 

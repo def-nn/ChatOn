@@ -14,8 +14,16 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorAccent">@color/colorAccent</item>
 
+        <item name="android:windowBackground">@color/colorMenuBg</item>
+
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="AppTheme.NoAnim" parent="AppTheme.NoActionBar">
+        <item name="android:windowExitAnimation">@null</item>
+        <item name="android:windowHideAnimation">@null</item>
+        <item name="android:windowAnimationStyle">@null</item>
     </style>
 
     <style name="AppTheme.ActionBar.Transparent" parent="AppTheme">

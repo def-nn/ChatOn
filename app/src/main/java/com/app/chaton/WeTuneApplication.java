@@ -17,8 +17,8 @@ public class WeTuneApplication extends MultiDexApplication {
     }
 
     public void connectToSocket(Long _u, String _s) {
-        socketHelper = new SocketHelper(_u, _s);
-        socketHelper.connect(getApplicationContext());
+        socketHelper = new SocketHelper(getApplicationContext(), _u, _s);
+        socketHelper.connect();
     }
 
     public SocketHelper getSocketHelper() { return this.socketHelper; }

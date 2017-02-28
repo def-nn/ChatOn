@@ -1,6 +1,9 @@
 package com.app.chaton.API_helpers;
 
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -123,6 +126,14 @@ public abstract class RequestHelper {
                 onFail(t);
             }
         });
+    }
+
+    public static boolean isConnected(Context context) {
+        ConnectivityManager cm =
+                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
     }
 
     public static String encode_s(String data) {

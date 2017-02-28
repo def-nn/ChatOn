@@ -27,6 +27,10 @@ public class PreferenceHelper {
         return preferences.getString(NAME, "");
     }
 
+    public String getEmail() {
+        return preferences.getString(EMAIL, "");
+    }
+
     public String getSecretKey() {
         return preferences.getString(SECRET_KEY, "");
     }

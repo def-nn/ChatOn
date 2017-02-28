@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +31,7 @@ import com.app.chaton.ui.ProgressDialog;
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
 
+import java.io.IOException;
 import java.net.UnknownHostException;
 
 
@@ -96,11 +98,12 @@ public class AuthActivity extends AppCompatActivity{
             if (!validateInput()) return;
 
             progressDialog.show(getSupportFragmentManager(), "ProgressDialog");
-            User user = new User(emailInput.getText().toString(), passInput.getText().toString());
+            User user = new User(emailInput.getText().toString(), passInput.getText().toString(), null);
 
             RequestHelper helper = new RequestHelper() {
                 @Override
                 public void onStatusOk(MapResponseObject response) {
+                    Log.d("myLogs", response.getData().toString());
                     User user = new User(response.getData());
                     preferenceHelper.authUser(user);
 
@@ -108,7 +111,7 @@ public class AuthActivity extends AppCompatActivity{
                             preferenceHelper.getSecretKey());
 
                     progressDialog.dismiss();
-                    Intent intent = new Intent(AuthActivity.this, MainActivity.class);
+                    Intent intent = new Intent(AuthActivity.this, DialogActivity.class);
                     startActivity(intent);
                 }
 
@@ -157,10 +160,12 @@ public class AuthActivity extends AppCompatActivity{
                     progressDialog.dismiss();
                     try {
                         throw t;
-                    } catch (UnknownHostException e) {
+                    } catch (IOException e) {
                         ToastHelper.makeToast(R.string.error_connection);
+                        ((Vibrator)getSystemService(VIBRATOR_SERVICE)).vibrate(100);
                     } catch (Throwable e) {
                         ToastHelper.makeToast(R.string.error_oops);
+                        ((Vibrator)getSystemService(VIBRATOR_SERVICE)).vibrate(100);
                         e.printStackTrace();
                     }
                 }

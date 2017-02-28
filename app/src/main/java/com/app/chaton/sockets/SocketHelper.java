@@ -1,6 +1,8 @@
 package com.app.chaton.sockets;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import com.app.chaton.API_helpers.Message;
@@ -9,6 +11,7 @@ import com.app.chaton.org.java_websocket.client.DefaultSSLWebSocketClientFactory
 import com.app.chaton.org.java_websocket.client.WebSocketClient;
 import com.app.chaton.org.java_websocket.drafts.Draft;
 import com.app.chaton.org.java_websocket.drafts.Draft_17;
+import com.app.chaton.org.java_websocket.exceptions.WebsocketNotConnectedException;
 import com.app.chaton.org.java_websocket.handshake.ServerHandshake;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
@@ -41,6 +44,9 @@ public class SocketHelper {
     private static final String ACT_MESSAGE = "message";
     private static final String ACT_TYPING = "type_pending";
 
+    private boolean hasNewMess;
+
+    private Context context;
     private Long id;
     private Map<String, String> headers;
     private SocketClient client;
@@ -65,9 +71,9 @@ public class SocketHelper {
 
             switch (jsonObject.get(ACT).getAsString()) {
                 case ACT_MESSAGE:
+                    hasNewMess = true;
                     JsonObject data = jsonObject.get(DATA).getAsJsonObject();
-                    if (data.get(RECEIVER).getAsJsonObject().get(ID).getAsLong() == socketListener.getCompanionId() ||
-                            data.get(SENDER).getAsJsonObject().get(ID).getAsLong() == socketListener.getCompanionId()) {
+                    if (data.get(SENDER).getAsJsonObject().get(ID).getAsLong() == socketListener.getCompanionId()) {
 
                         HashMap<String, Object> mess_data = new HashMap<>();
                         mess_data.put(Message.ID, data.get(ID).getAsLong());
@@ -75,9 +81,16 @@ public class SocketHelper {
                         mess_data.put(Message.RECEIVER, data.get(RECEIVER).getAsJsonObject().get(ID).getAsLong());
                         mess_data.put(Message.MESSAGE, data.get(MESSAGE).getAsString());
                         // TODO
+
+                        socketListener.stopTyping();
                         socketListener.onMessageReceived(new Message(mess_data));
                     }
                     break;
+                case ACT_TYPING:
+                    if (jsonObject.get(SENDER).getAsLong() == socketListener.getCompanionId()) {
+                        socketListener.setTyping(true);
+                        socketListener.onTypePending();
+                    }
                 default:
                     Log.d("myLogs", jsonObject.get(ACT).getAsString());
             }
@@ -86,6 +99,15 @@ public class SocketHelper {
         @Override
         public void onClose(int code, String reason, boolean remote) {
             Log.d("myLogs", "closed " + reason + " " + code + " " + remote);
+
+            if (code == 1006 || code == 1002)
+                new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        Log.d("myLogs", "reconnecting");
+                        SocketHelper.this.reconnect();
+                    }
+                }, 200);
         }
 
         @Override
@@ -95,7 +117,8 @@ public class SocketHelper {
         }
     }
 
-    public SocketHelper(Long _u, String _s) {
+    public SocketHelper(Context context, Long _u, String _s) {
+        this.context = context;
         this.id = _u;
 
         this.headers = new HashMap<>();
@@ -105,7 +128,11 @@ public class SocketHelper {
         client = new SocketClient(URI.create(SOCKET_URL), new Draft_17(), headers, 0);
     }
 
-    public void connect(Context context) {
+    public boolean isConnected() { return client.getConnection().isOpen(); }
+
+    public boolean hasNewMess() { return hasNewMess; }
+
+    public void connect() {
         try {
             ProviderInstaller.installIfNeeded(context);
             SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
@@ -118,7 +145,15 @@ public class SocketHelper {
         client.connect();
     }
 
-    public void send(Long reciever, String message) {
+    public void reconnect() {
+        client.close();
+        client = new SocketClient(URI.create(SOCKET_URL), new Draft_17(), headers, 0);
+        connect();
+    }
+
+    public void send(Long reciever, String message) throws WebsocketNotConnectedException {
+        if (!client.getConnection().isOpen()) reconnect();
+
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty(ACT, ACT_MESSAGE);
         jsonObject.addProperty(U_ID, reciever);
@@ -127,10 +162,12 @@ public class SocketHelper {
         client.send(jsonObject.toString());
     }
 
-    public void notifyTyping(Long reciverId) {
+    public void notifyTyping(Long receiverId) throws WebsocketNotConnectedException {
+        if (!client.getConnection().isOpen()) reconnect();
+
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty(ACT, ACT_TYPING);
-        jsonObject.addProperty(RECEIVER, reciverId);
+        jsonObject.addProperty(RECEIVER, receiverId);
 
         client.send(jsonObject.toString());
     }

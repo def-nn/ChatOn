@@ -15,20 +15,29 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <activity android:name=".MainActivity"
-            android:theme="@style/AppTheme.NoActionBar">
+
+        <activity android:name=".LauncherActivity"
+            android:theme="@style/AppTheme.NoAnim">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".StartActivity"
+            android:theme="@style/AppTheme.NoAnim" >
+        </activity>
+
         <activity
             android:name=".AuthActivity"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="adjustResize"/>
+            android:windowSoftInputMode="adjustResize">
+        </activity>
+
         <activity android:name=".DialogActivity"
             android:theme="@style/AppTheme.NoActionBar"/>
+
         <activity android:name=".ChatActivity"/>
     </application>
 

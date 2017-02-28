@@ -22,4 +22,5 @@
     <color name="colorDarkGray">#666</color>
     <color name="transparent">#00000000</color>
     <color name="darkTransparent">#64000000</color>
+    <color name="colorRed">#EF5350</color>
 </resources>
