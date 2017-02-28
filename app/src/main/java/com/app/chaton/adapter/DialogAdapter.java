@@ -1,11 +1,8 @@
 package com.app.chaton.adapter;
 
-import android.content.Context;
-import android.graphics.Bitmap;
+import android.app.Activity;
 import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.graphics.Typeface;
-import android.os.AsyncTask;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
@@ -19,11 +16,9 @@ import android.widget.TextView;
 import com.app.chaton.API_helpers.Message;
 import com.app.chaton.DialogActivity;
 import com.app.chaton.R;
+import com.app.chaton.Utils.ImageDownloader;
+import com.app.chaton.Utils.PreferenceHelper;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -36,8 +31,9 @@ public class DialogAdapter extends RecyclerView.Adapter<DialogAdapter.ViewHolder
 
     private DialogActivity.DialogListenerFactory dialogListenerFactory;
 
-    private Context context;
+    private Activity activity;
     private List<Message> message_list;
+    private PreferenceHelper preferenceHelper;
 
     private SimpleDateFormat timePattern, datePattern;
     {
@@ -63,11 +59,13 @@ public class DialogAdapter extends RecyclerView.Adapter<DialogAdapter.ViewHolder
         }
     }
 
-    public DialogAdapter(Context context, List<Message> message_list,
-                         DialogActivity.DialogListenerFactory dialogListenerFactory) {
-        this.context = context;
+    public DialogAdapter(Activity activity, List<Message> message_list,
+                         DialogActivity.DialogListenerFactory dialogListenerFactory,
+                         PreferenceHelper preferenceHelper) {
+        this.activity = activity;
         this.message_list = message_list;
         this.dialogListenerFactory = dialogListenerFactory;
+        this.preferenceHelper = preferenceHelper;
     }
 
     @Override
@@ -87,11 +85,14 @@ public class DialogAdapter extends RecyclerView.Adapter<DialogAdapter.ViewHolder
         dialog.date.setText(getDateCreation(message.createdAt()));
 
         if (message.isViewed())
-            dialog.status.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.circle_not_active));
-        else
-            dialog.status.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.circle_active));
+            dialog.status.setImageDrawable(ContextCompat.getDrawable(activity, R.drawable.circle_not_active));
+        else {
+            dialog.status.setImageDrawable(ContextCompat.getDrawable(activity, R.drawable.circle_active));
+            dialog.friendImage.setBorderWidth(6);
+            dialog.friendImage.setBorderColor(ContextCompat.getColor(activity, R.color.colorAccent));
+        }
 
-        Typeface myriad = Typeface.createFromAsset(context.getAssets(), "fonts/MyriadPro.ttf");
+        Typeface myriad = Typeface.createFromAsset(activity.getAssets(), "fonts/MyriadPro.ttf");
         dialog.text.setTypeface(myriad);
         dialog.name.setTypeface(myriad);
         dialog.date.setTypeface(myriad);
@@ -101,7 +102,15 @@ public class DialogAdapter extends RecyclerView.Adapter<DialogAdapter.ViewHolder
                 dialog.text.setText(message.getBody().substring(0, 23).concat("..."));
             else
                 dialog.text.setText(message.getBody());
-            // TODO bind user porfile image
+
+            new ImageDownloader(activity, preferenceHelper.getAvatar()) {
+                @Override
+                protected void onPostExecute(byte[] bm_data) {
+                    super.onPostExecute(bm_data);
+                    dialog.ownerImage.setImageBitmap(BitmapFactory.decodeByteArray(bm_data, 0, bm_data.length));
+                }
+            }.execute();
+
         } else {
             if (message.getBody().length() > 30)
                 dialog.text.setText(message.getBody().substring(0, 28).concat("..."));
@@ -110,74 +119,38 @@ public class DialogAdapter extends RecyclerView.Adapter<DialogAdapter.ViewHolder
         }
 
         if (!message.getCompanion().getAvatar().equals("avatar.png"))
-            new BitmapDownloader(dialog.friendImage, message.getCompanion().getAvatar(), 45).execute();
+            new ImageDownloader(activity, message.getCompanion().getAvatar()) {
+                @Override
+                protected void onPostExecute(byte[] bm_data) {
+                    super.onPostExecute(bm_data);
+                    dialog.friendImage.setImageBitmap(BitmapFactory.decodeByteArray(bm_data, 0, bm_data.length));
+                }
+            }.execute();
 
         dialog.dialogLayout.setOnClickListener(
                 dialogListenerFactory.createListener(message.getCompanion().getId(),
-                                                     message.getCompanion().getName()));
-    }
-
-    private class BitmapDownloader extends AsyncTask<Void, Void, Bitmap> {
-        private static final String DOWNLOAD_URL = "https://chaton.ga/uploads/avatars/";
-
-        CircleImageView imageView;
-        String image_url;
-        int reqSide;
-
-        BitmapDownloader(CircleImageView imageView, String image_url, int reqSide) {
-            this.imageView = imageView;
-            this.image_url = image_url;
-            this.reqSide = reqSide;
-        }
-
-        @Override
-        protected Bitmap doInBackground(Void... voids) {
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inJustDecodeBounds = true;
-
-            try {
-                URL url = new URL(DOWNLOAD_URL + image_url);
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                connection.setDoInput(true);
-                connection.connect();
-                InputStream inputStream = connection.getInputStream();
-
-                Bitmap bm = BitmapFactory.decodeStream(inputStream);
-
-                int width = bm.getWidth();
-                int height = bm.getHeight();
-                float scaleWidth = ((float) reqSide) / width;
-                float scaleHeight = ((float) reqSide) / height;
-
-                Matrix matrix = new Matrix();
-                matrix.postScale(scaleWidth, scaleHeight);
-
-                return Bitmap.createBitmap(bm, 0, 0, width, height, matrix, false);
-            } catch (IOException e) {
-                Log.d("myLogs", "stub");
-                e.printStackTrace();
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(Bitmap bitmap) {
-            super.onPostExecute(bitmap);
-                Log.d("myLogs", "" + bitmap.getWidth());
-                imageView.setImageBitmap(bitmap);
-        }
+                                                     message.getCompanion().getName(),
+                                                     message.getCompanion().getAvatar()));
     }
 
     private String getDateCreation(Long created_at) {
-        Date creation_date = new Date(created_at);
+        Date creation_date = new Date(created_at * 1000);
         long time_diff = new Date().getTime() - creation_date.getTime();
 
-        if (time_diff < DAY_MILLS)
+        Log.d("myLogs", "date " + new Date().getTime() + " " + creation_date.getTime());
+
+        if (time_diff < DAY_MILLS) {
+            Log.d("myLogs", "date1 " + timePattern.format(creation_date));
             return timePattern.format(creation_date);
-        else if (time_diff < DAY_MILLS * 2)
-            return context.getResources().getString(R.string.yesterday);
-        else
+        }
+        else if (time_diff < DAY_MILLS * 2) {
+            Log.d("myLogs", "date2 " + activity.getResources().getString(R.string.yesterday));
+            return activity.getResources().getString(R.string.yesterday);
+        }
+        else {
+            Log.d("myLogs", "date3 " + datePattern.format(creation_date));
             return datePattern.format(creation_date);
+        }
     }
 
     @Override

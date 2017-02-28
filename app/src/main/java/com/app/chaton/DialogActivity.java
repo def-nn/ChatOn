@@ -39,7 +39,7 @@ public class DialogActivity extends AppCompatActivity implements PullRefreshLayo
 
     public static final String AUTH_REQUEST_SENT = "auth_sent";
 
-    private boolean isDataUploaded;
+    private boolean isDataUploaded, asyncRunning;
 
     private CallService callService;
     private PreferenceHelper preferenceHelper;
@@ -114,7 +114,10 @@ public class DialogActivity extends AppCompatActivity implements PullRefreshLayo
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        setDialogPanel((List<Message>) savedInstanceState.getSerializable("messageList"));
+        if (savedInstanceState.getBoolean("isDataUploaded"))
+            if (savedInstanceState.getSerializable("messageList") != null)
+                setDialogPanel((List<Message>) savedInstanceState.getSerializable("messageList"));
+            else uploadDialogsList();
     }
 
     @Override
@@ -132,38 +135,44 @@ public class DialogActivity extends AppCompatActivity implements PullRefreshLayo
     }
 
     private void uploadDialogsList() {
-        if (!RequestHelper.isConnected(getApplicationContext())) {
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    ((Vibrator)getSystemService(VIBRATOR_SERVICE)).vibrate(100);
-                    refreshDialog.setRefreshing(false);
-                    findViewById(R.id.progressBar).setVisibility(View.GONE);
-                    findViewById(R.id.tvTryAgain).setVisibility(View.VISIBLE);
-                    btnTryAgain.setVisibility(View.VISIBLE);
-                }
-            }, 600);
-            return;
-        }
+        asyncRunning = true;
 
         requestHelper = new RequestHelper() {
             @Override
             public void onStatusOk(MessageResponseObject response) {
                 refreshDialog.setRefreshing(false);
                 setDialogPanel(response.getData());
+                asyncRunning = false;
             }
 
             @Override
             public void onStatusServerError(MessageResponseObject response) {
                 refreshDialog.setRefreshing(false);
                 ToastHelper.makeToast("Server error");
+                asyncRunning = false;
             }
 
             @Override
             public void onFail(Throwable t) {
                 refreshDialog.setRefreshing(false);
-                ToastHelper.makeToast(t.toString());
-                t.printStackTrace();
+                try {
+                    throw t;
+                } catch (IOException e) {
+                    refreshDialog.setRefreshing(false);
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            findViewById(R.id.progressBar).setVisibility(View.GONE);
+                            findViewById(R.id.tvTryAgain).setVisibility(View.VISIBLE);
+                            btnTryAgain.setVisibility(View.VISIBLE);
+                        }
+                    }, 600);
+                } catch (Throwable e) {
+                    ToastHelper.makeToast(R.string.error_oops);
+                    ((Vibrator)getSystemService(VIBRATOR_SERVICE)).vibrate(100);
+                    e.printStackTrace();
+                }
+                asyncRunning = false;
             }
         };
 
@@ -175,8 +184,7 @@ public class DialogActivity extends AppCompatActivity implements PullRefreshLayo
 
     private void setDialogPanel(List<Message> messageList) {
         isDataUploaded = true;
-        dialogAdapter = new DialogAdapter(getApplicationContext(), messageList,
-                new DialogListenerFactory());
+        dialogAdapter = new DialogAdapter(this, messageList, new DialogListenerFactory(), preferenceHelper);
         dialogsView.setAdapter(dialogAdapter);
         dialogsView.setVisibility(View.VISIBLE);
         findViewById(R.id.progressView).setVisibility(View.GONE);
@@ -227,13 +235,15 @@ public class DialogActivity extends AppCompatActivity implements PullRefreshLayo
     }
 
     public class DialogListenerFactory {
-        public View.OnClickListener createListener(final Long companionId, final String companionName) {
+        public View.OnClickListener createListener(final Long companionId, final String companionName,
+                                                   final String companionAvatar) {
             return new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     Intent intent = new Intent(DialogActivity.this, ChatActivity.class);
                     intent.putExtra(PreferenceHelper.ID, companionId);
                     intent.putExtra(PreferenceHelper.NAME, companionName);
+                    intent.putExtra(PreferenceHelper.AVATAR, companionAvatar);
                     startActivity(intent);
                 }
             };

@@ -22,8 +22,6 @@
             android:layout_width="45dp"
             android:layout_height="45dp"
             android:src="@drawable/avatar"
-            app:civ_border_width="2dp"
-            app:civ_border_color="@color/colorAccent"
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -36,9 +34,7 @@
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/ownerImage"
-            android:src="@drawable/user_w"
-            app:civ_border_width="2dp"
-            app:civ_border_color="@color/colorAccent"
+            android:src="@drawable/avatar"
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
             app:layout_constraintLeft_toLeftOf="@+id/friendName"

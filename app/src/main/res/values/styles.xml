@@ -21,9 +21,8 @@
     </style>
 
     <style name="AppTheme.NoAnim" parent="AppTheme.NoActionBar">
-        <item name="android:windowExitAnimation">@null</item>
-        <item name="android:windowHideAnimation">@null</item>
-        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:windowShowAnimation">@null</item>
+        <item name="android:windowEnterAnimation">@null</item>
     </style>
 
     <style name="AppTheme.ActionBar.Transparent" parent="AppTheme">

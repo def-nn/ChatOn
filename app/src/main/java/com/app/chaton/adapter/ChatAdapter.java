@@ -1,6 +1,7 @@
 package com.app.chaton.adapter;
 
 import android.content.Context;
+import android.graphics.BitmapFactory;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,6 +12,7 @@ import android.widget.TextView;
 
 import com.app.chaton.API_helpers.Message;
 import com.app.chaton.R;
+import com.app.chaton.Utils.ImageDownloader;
 
 import java.util.List;
 
@@ -18,7 +20,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
 
     private Context context;
     private List<Message> message_list;
-    private String companionName, myName;
+    private String companionName, myName, companionAvatar, myAvatar;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView messName, messBody;
@@ -32,12 +34,14 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
         }
     }
 
-    public ChatAdapter(Context context, List<Message> message_list,
-                                    String myName, String companion_name) {
+    public ChatAdapter(Context context, List<Message> message_list, String myName,
+                       String companion_name, String myAvatar, String companionAvatar) {
         this.context = context;
         this.message_list = message_list;
         this.companionName = companion_name;
         this.myName = myName;
+        this.myAvatar = myAvatar;
+        this.companionAvatar = companionAvatar;
     }
 
     @Override
@@ -50,17 +54,30 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
     }
 
     @Override
-    public void onBindViewHolder(ChatAdapter.ViewHolder message_view, int position) {
+    public void onBindViewHolder(final ChatAdapter.ViewHolder message_view, int position) {
         Message message = this.message_list.get(position);
 
-        if (message_view.getItemViewType() == Message.TYPE_TO)
+        if (message_view.getItemViewType() == Message.TYPE_TO) {
             message_view.messName.setText(myName);
-        else
+            new ImageDownloader(context, myAvatar) {
+                @Override
+                protected void onPostExecute(byte[] bm_data) {
+                    super.onPostExecute(bm_data);
+                    message_view.messImage.setImageBitmap(BitmapFactory.decodeByteArray(bm_data, 0, bm_data.length));
+                }
+            }.execute();
+        } else {
             message_view.messName.setText(companionName);
+            new ImageDownloader(context, companionAvatar) {
+                @Override
+                protected void onPostExecute(byte[] bm_data) {
+                    super.onPostExecute(bm_data);
+                    message_view.messImage.setImageBitmap(BitmapFactory.decodeByteArray(bm_data, 0, bm_data.length));
+                }
+            }.execute();
+        }
 
         message_view.messBody.setText(message.getBody());
-
-        // TODO bind user profile image
     }
 
     @Override

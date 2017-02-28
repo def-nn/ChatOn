@@ -25,6 +25,8 @@ import com.app.chaton.API_helpers.RequestHelper;
 import com.app.chaton.API_helpers.RequestObject;
 import com.app.chaton.API_helpers.ServiceGenerator;
 import com.app.chaton.API_helpers.User;
+import com.app.chaton.Utils.ImageDownloader;
+import com.app.chaton.Utils.DbHelper;
 import com.app.chaton.Utils.PreferenceHelper;
 import com.app.chaton.Utils.ToastHelper;
 import com.app.chaton.ui.ProgressDialog;
@@ -32,7 +34,6 @@ import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
 
 import java.io.IOException;
-import java.net.UnknownHostException;
 
 
 public class AuthActivity extends AppCompatActivity{
@@ -47,6 +48,7 @@ public class AuthActivity extends AppCompatActivity{
 
     CallService callService;
     PreferenceHelper preferenceHelper;
+    DbHelper dbHelper;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -56,6 +58,7 @@ public class AuthActivity extends AppCompatActivity{
         callService = ServiceGenerator.createService(CallService.class);
         preferenceHelper = new PreferenceHelper(getSharedPreferences(
                 getResources().getString(R.string.PREFERENCE_FILE), MODE_PRIVATE));
+        dbHelper = new DbHelper(getApplicationContext());
 
         rootView = (ViewGroup) findViewById(R.id.rootView);
 
@@ -106,6 +109,8 @@ public class AuthActivity extends AppCompatActivity{
                     Log.d("myLogs", response.getData().toString());
                     User user = new User(response.getData());
                     preferenceHelper.authUser(user);
+
+                    new ImageDownloader(getApplicationContext(), user.getAvatar()).execute();
 
                     ((WeTuneApplication) getApplication()).connectToSocket(preferenceHelper.getId(),
                             preferenceHelper.getSecretKey());

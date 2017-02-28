@@ -36,7 +36,7 @@
         </activity>
 
         <activity android:name=".DialogActivity"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:theme="@style/AppTheme.NoAnim"/>
 
         <activity android:name=".ChatActivity"/>
     </application>

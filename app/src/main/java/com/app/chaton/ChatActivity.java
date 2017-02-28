@@ -47,7 +47,7 @@ public class ChatActivity extends AppCompatActivity implements SocketListener{
     private static final String EDITED = "edited";
 
     private Long companionId;
-    private String companionName;
+    private String companionName, companionAvatar;
     private boolean isDataUploaded, isTyping;
 
     private ActionBar actionBar;
@@ -82,6 +82,7 @@ public class ChatActivity extends AppCompatActivity implements SocketListener{
         Intent intent = getIntent();
         companionId = intent.getLongExtra(PreferenceHelper.ID, 0);
         companionName = intent.getStringExtra(PreferenceHelper.NAME);
+        companionAvatar = intent.getStringExtra(PreferenceHelper.AVATAR);
 
         chatView = (RecyclerView) findViewById(R.id.chatView);
         chatView.setHasFixedSize(true);
@@ -234,7 +235,7 @@ public class ChatActivity extends AppCompatActivity implements SocketListener{
 
         if (messageList.size() != 0) {
             chatAdapter = new ChatAdapter(getApplicationContext(), messageList,
-                    preferenceHelper.getName(),  companionName);
+                    preferenceHelper.getName(), companionName, preferenceHelper.getAvatar(), companionAvatar);
             chatView.setAdapter(chatAdapter);
         } else
             tvNoMess.setVisibility(View.VISIBLE);

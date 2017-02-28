@@ -12,6 +12,7 @@ import com.app.chaton.API_helpers.RequestHelper;
 import com.app.chaton.API_helpers.RequestObject;
 import com.app.chaton.API_helpers.ServiceGenerator;
 import com.app.chaton.API_helpers.User;
+import com.app.chaton.Utils.ImageDownloader;
 import com.app.chaton.Utils.PreferenceHelper;
 
 import com.google.android.vending.licensing.AESObfuscator;
@@ -19,10 +20,7 @@ import com.google.android.vending.licensing.LicenseChecker;
 import com.google.android.vending.licensing.LicenseCheckerCallback;
 import com.google.android.vending.licensing.ServerManagedPolicy;
 
-import java.io.IOError;
 import java.io.IOException;
-import java.net.SocketTimeoutException;
-import java.util.concurrent.TimeoutException;
 
 
 public class LauncherActivity extends Activity {
@@ -32,7 +30,6 @@ public class LauncherActivity extends Activity {
     private PreferenceHelper preferenceHelper;
     private CallService callService;
     private RequestHelper helper;
-
     private LicenseCheckerCallback mLicenseCheckerCallback;
     private LicenseChecker mChecker;
 
@@ -67,6 +64,8 @@ public class LauncherActivity extends Activity {
                 Log.d("myLogs", response.getData().toString());
                 User user = new User(response.getData());
                 preferenceHelper.authUser(user);
+
+                new ImageDownloader(getApplicationContext(), user.getAvatar()).execute();
 
                 ((WeTuneApplication) getApplication()).connectToSocket(preferenceHelper.getId(),
                         preferenceHelper.getSecretKey());

@@ -14,6 +14,7 @@ public class User implements Parcelable{
     private final static String IS_ADMIN = "is_admin";
     private final static String SECRET_KEY = "secret_key";
     private final static String _U = "_u";
+    private final static String AVATAR = "avatar";
 
     private String name;
     private String email;
@@ -38,6 +39,7 @@ public class User implements Parcelable{
         this.is_admin = Boolean.valueOf(data.get(IS_ADMIN));
         this.secret_key = data.get(SECRET_KEY);
         this._u = Long.valueOf(data.get(_U));
+        this.avatar = data.get(AVATAR);
     }
 
     // Используется при отправке запроса с идентефикатором пользователя

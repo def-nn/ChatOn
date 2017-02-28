@@ -11,6 +11,7 @@ public class PreferenceHelper {
     private final static String EMAIL = "email";
     private final static String IS_ADMIN = "is_admin";
     private final static String SECRET_KEY = "secret_key";
+    public final static String AVATAR = "avatar";
     public final static String ID = "id";
 
     private SharedPreferences preferences;
@@ -35,6 +36,10 @@ public class PreferenceHelper {
         return preferences.getString(SECRET_KEY, "");
     }
 
+    public String getAvatar() {
+        return preferences.getString(AVATAR, "");
+    }
+
     public Long getId() {
         return preferences.getLong(ID, 0);
     }
@@ -48,6 +53,7 @@ public class PreferenceHelper {
         editor.putBoolean(IS_ADMIN, user.isAdmin());
         editor.putString(SECRET_KEY, user.getSecretKey());
         editor.putLong(ID, user.getId());
+        editor.putString(AVATAR, user.getAvatar());
 
         editor.commit();
     }
