@@ -26,6 +26,7 @@ import com.app.chaton.API_helpers.User;
 import com.app.chaton.Utils.PreferenceHelper;
 import com.app.chaton.Utils.ToastHelper;
 import com.app.chaton.adapter.DialogAdapter;
+import com.app.chaton.sockets.SocketHelper;
 import com.baoyz.widget.PullRefreshLayout;
 
 import java.io.IOException;
@@ -44,6 +45,7 @@ public class DialogActivity extends AppCompatActivity implements PullRefreshLayo
     private CallService callService;
     private PreferenceHelper preferenceHelper;
     private RequestHelper requestHelper;
+    private SocketHelper socketHelper;
 
     private RecyclerView dialogsView;
     private LinearLayoutManager dialogsManager;
@@ -101,6 +103,12 @@ public class DialogActivity extends AppCompatActivity implements PullRefreshLayo
         if (!getIntent().getBooleanExtra(AUTH_REQUEST_SENT, true)) authUser(savedInstanceState);
         else if (savedInstanceState == null) uploadDialogsList();
 
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        if (socketHelper != null && socketHelper.hasNewMess()) uploadDialogsList();
     }
 
     @Override
@@ -201,6 +209,7 @@ public class DialogActivity extends AppCompatActivity implements PullRefreshLayo
 
                 ((WeTuneApplication) getApplication()).connectToSocket(preferenceHelper.getId(),
                         preferenceHelper.getSecretKey());
+                socketHelper = ((WeTuneApplication) getApplication()).getSocketHelper();
 
                 uploadDialogsList();
             }

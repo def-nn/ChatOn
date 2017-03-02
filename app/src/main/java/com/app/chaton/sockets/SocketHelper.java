@@ -22,7 +22,9 @@ import com.google.gson.JsonParser;
 import java.net.URI;
 import java.security.GeneralSecurityException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.net.ssl.SSLContext;
 
@@ -44,14 +46,14 @@ public class SocketHelper {
     private static final String ACT_MESSAGE = "message";
     private static final String ACT_TYPING = "type_pending";
 
-    private boolean hasNewMess;
-
     private Context context;
     private Long id;
     private Map<String, String> headers;
     private SocketClient client;
 
     private SocketListener socketListener;
+
+    private Set<Long> messageStack;
 
     private class SocketClient extends WebSocketClient {
 
@@ -71,8 +73,13 @@ public class SocketHelper {
 
             switch (jsonObject.get(ACT).getAsString()) {
                 case ACT_MESSAGE:
-                    hasNewMess = true;
                     JsonObject data = jsonObject.get(DATA).getAsJsonObject();
+                    if (data.get(RECEIVER).getAsJsonObject().get(ID).getAsLong() == id)
+                        messageStack.add(data.get(SENDER).getAsJsonObject().get(ID).getAsLong());
+                    else messageStack.add(data.get(RECEIVER).getAsJsonObject().get(ID).getAsLong());
+
+                    Log.d("myLogs", "stack " + messageStack);
+
                     if (data.get(SENDER).getAsJsonObject().get(ID).getAsLong() == socketListener.getCompanionId()) {
 
                         HashMap<String, Object> mess_data = new HashMap<>();
@@ -126,11 +133,18 @@ public class SocketHelper {
         headers.put(_S, RequestHelper.encode_s(_s));
 
         client = new SocketClient(URI.create(SOCKET_URL), new Draft_17(), headers, 0);
+
+        this.messageStack = new HashSet<>();
+    }
+
+    public boolean hasNewMess() { return (messageStack.size() > 0); }
+
+    public void removeMessFromStack(Long id) {
+        messageStack.remove(id);
+        Log.d("myLogs", "stack " + messageStack);
     }
 
     public boolean isConnected() { return client.getConnection().isOpen(); }
-
-    public boolean hasNewMess() { return hasNewMess; }
 
     public void connect() {
         try {
