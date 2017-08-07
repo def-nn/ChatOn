@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Vibrator;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -117,6 +118,7 @@ public class AuthActivity extends AppCompatActivity{
 
                     progressDialog.dismiss();
                     Intent intent = new Intent(AuthActivity.this, DialogActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                 }
 
@@ -161,18 +163,24 @@ public class AuthActivity extends AppCompatActivity{
                 }
 
                 @Override
-                public void onFail(Throwable t) {
-                    progressDialog.dismiss();
-                    try {
-                        throw t;
-                    } catch (IOException e) {
-                        ToastHelper.makeToast(R.string.error_connection);
-                        ((Vibrator)getSystemService(VIBRATOR_SERVICE)).vibrate(100);
-                    } catch (Throwable e) {
-                        ToastHelper.makeToast(R.string.error_oops);
-                        ((Vibrator)getSystemService(VIBRATOR_SERVICE)).vibrate(100);
-                        e.printStackTrace();
-                    }
+                public void onFail(final Throwable t) {
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            progressDialog.dismiss();
+                            try {
+                                Log.d("myLogs", t.toString());
+                                throw t;
+                            } catch (IOException e) {
+                                ToastHelper.makeToast(R.string.error_connection);
+                                ((Vibrator)getSystemService(VIBRATOR_SERVICE)).vibrate(100);
+                            } catch (Throwable e) {
+                                ToastHelper.makeToast(R.string.error_oops);
+                                ((Vibrator)getSystemService(VIBRATOR_SERVICE)).vibrate(100);
+                                e.printStackTrace();
+                            }
+                        }
+                    }, 600);
                 }
             };
             helper.auth(callService, new RequestObject(user));

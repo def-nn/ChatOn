@@ -31,15 +31,15 @@ import com.app.chaton.API_helpers.Message;
 import com.app.chaton.API_helpers.MessageResponseObject;
 import com.app.chaton.API_helpers.RequestHelper;
 import com.app.chaton.API_helpers.ServiceGenerator;
+import com.app.chaton.Utils.DbHelper;
 import com.app.chaton.Utils.ToastHelper;
 import com.app.chaton.sockets.SocketHelper;
 import com.app.chaton.Utils.PreferenceHelper;
 import com.app.chaton.adapter.ChatAdapter;
 import com.app.chaton.sockets.SocketListener;
 
-import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 
 public class ChatActivity extends AppCompatActivity implements SocketListener{
 
@@ -47,8 +47,8 @@ public class ChatActivity extends AppCompatActivity implements SocketListener{
     private static final String EDITED = "edited";
 
     private Long companionId;
-    private String companionName, companionAvatar;
-    private boolean isDataUploaded, isTyping;
+    private String companionName;
+    private boolean isTyping;
 
     private ActionBar actionBar;
     private Button btnSend, btnTryAgain;
@@ -66,6 +66,7 @@ public class ChatActivity extends AppCompatActivity implements SocketListener{
     private CallService callService;
     private PreferenceHelper preferenceHelper;
     private SocketHelper socketHelper;
+    private DbHelper dbHelper;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -75,6 +76,7 @@ public class ChatActivity extends AppCompatActivity implements SocketListener{
         callService = ServiceGenerator.createService(CallService.class);
         preferenceHelper = new PreferenceHelper(getSharedPreferences(
                 getResources().getString(R.string.PREFERENCE_FILE), MODE_PRIVATE));
+        dbHelper = new DbHelper(getApplicationContext());
 
         socketHelper = ((WeTuneApplication) getApplication()).getSocketHelper();
         socketHelper.setSocketListener(this);
@@ -82,7 +84,6 @@ public class ChatActivity extends AppCompatActivity implements SocketListener{
         Intent intent = getIntent();
         companionId = intent.getLongExtra(PreferenceHelper.ID, 0);
         companionName = intent.getStringExtra(PreferenceHelper.NAME);
-        companionAvatar = intent.getStringExtra(PreferenceHelper.AVATAR);
 
         chatView = (RecyclerView) findViewById(R.id.chatView);
         chatView.setHasFixedSize(true);
@@ -95,8 +96,7 @@ public class ChatActivity extends AppCompatActivity implements SocketListener{
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         btnTryAgain = (Button) findViewById(R.id.btnTryAgain);
 
-        if (savedInstanceState == null) uploadData();
-
+        uploadData();
         setActionBar();
 
         btnSend = (Button) findViewById(R.id.btnSend);
@@ -157,41 +157,44 @@ public class ChatActivity extends AppCompatActivity implements SocketListener{
         btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                HashMap<String, Object> mess_data = new HashMap<>();
+                final HashMap<String, Object> mess_data = new HashMap<>();
                 mess_data.put(Message.ID, 0L);
                 mess_data.put(Message.OWNER, preferenceHelper.getId());
                 mess_data.put(Message.RECEIVER, companionId);
                 mess_data.put(Message.MESSAGE, messInput.getText().toString());
+                mess_data.put(Message.CREATED_AT, new Date().getTime() / 1000);
 
-                Message message = new Message(mess_data);
+                final Message message = new Message(mess_data);
                 message.setCompanion(companionId);
+                message.setState(Message.STATE_PROCESS);
 
-                chatAdapter.getMessageList().add(message);
-                chatAdapter.notifyItemInserted(chatAdapter.getItemCount() - 1);
-                chatManager.scrollToPosition(chatAdapter.getItemCount() - 1);
-
-                messInput.setText("");
+                dbHelper.addMessToDb(message, companionId);
+                chatAdapter.setCursor(dbHelper.getMessageList(companionId));
+                updateChatView();
 
                 try {
                     socketHelper.send(companionId, message.getBody());
                 } catch (Exception e) {
-                    chatView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                        @Override
-                        public void onGlobalLayout() {
-                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
-                                chatView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                            } else {
-                                chatView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                            }
-
-                            chatView.getLayoutManager().findViewByPosition(chatAdapter.getItemCount() - 1)
-                                                       .findViewById(R.id.icError).setVisibility(View.VISIBLE);
-                        }
-                    });
+                    dbHelper.changeMessageState(message.getTempId(), Message.STATE_FAILURE, companionId);
+//                    chatView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+//                    @Override
+//                    public void onGlobalLayout() {
+//                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
+//                            chatView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+//                        } else {
+//                            chatView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+//                        }
+//
+//                        View view = chatView.getLayoutManager().findViewByPosition(chatAdapter.getItemCount() - 1);
+//                        view.findViewById(R.id.icProcess).setVisibility(View.GONE);
+//                        view.findViewById(R.id.icError).setVisibility(View.VISIBLE);
+//                    }
+//                    });
+                    chatAdapter.setCursor(dbHelper.getMessageList(companionId));
+                    updateChatView();
                     ToastHelper.makeToast(R.string.error_data_uploading);
                     e.printStackTrace();
                 }
-
             }
         });
     }
@@ -206,16 +209,12 @@ public class ChatActivity extends AppCompatActivity implements SocketListener{
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString("mess", messInput.getText().toString());
-        outState.putBoolean("isDataUploaded", isDataUploaded);
-        if (isDataUploaded)
-            outState.putSerializable("messageList", new ArrayList<>(chatAdapter.getMessageList()));
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         messInput.setText(savedInstanceState.getString("mess"));
-        showMessages((List<Message>) savedInstanceState.getSerializable("messageList"));
     }
 
     private void setActionBar() {
@@ -230,20 +229,19 @@ public class ChatActivity extends AppCompatActivity implements SocketListener{
         toolbar.setPadding(0, 0, 0, 0);
     }
 
-    private void showMessages(List<Message> messageList) {
-        isDataUploaded = true;
-
-        if (messageList.size() != 0) {
-            chatAdapter = new ChatAdapter(getApplicationContext(), messageList,
-                    preferenceHelper.getName(), companionName, preferenceHelper.getAvatar(), companionAvatar);
-            chatView.setAdapter(chatAdapter);
-        } else
-            tvNoMess.setVisibility(View.VISIBLE);
+    private void loadMessagesFromDb() {
+        chatAdapter = new ChatAdapter(dbHelper.getMessageList(companionId));
+        chatView.setAdapter(chatAdapter);
         progressBar.setVisibility(View.GONE);
     }
 
     private void uploadData() {
         progressBar.setVisibility(View.VISIBLE);
+
+        if (dbHelper.messagesInDb(companionId)) {
+            loadMessagesFromDb();
+            return;
+        }
 
         if (!isConnected()) {
             new Handler().postDelayed(new Runnable() {
@@ -259,7 +257,8 @@ public class ChatActivity extends AppCompatActivity implements SocketListener{
         RequestHelper requestHelper = new RequestHelper() {
             @Override
             public void onStatusOk(MessageResponseObject response) {
-                showMessages(response.getData());
+                dbHelper.writeMessagesToDb(response.getData(), companionId);
+                loadMessagesFromDb();
             }
 
             @Override
@@ -293,18 +292,30 @@ public class ChatActivity extends AppCompatActivity implements SocketListener{
 
     @Override
     public void onMessageReceived(final Message message) {
-        message.setCompanion(companionId);
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                chatAdapter.getMessageList().add(message);
-                chatAdapter.notifyItemInserted(chatAdapter.getItemCount() - 1);
-                chatManager.scrollToPosition(chatAdapter.getItemCount() - 1);
+        if (!message.to().equals(companionId) ||
+                (message.to().equals(companionId) &&
+                 dbHelper.changeMessageState(
+                         message.getTempId(), Message.STATE_SUCCESS, message.getId()) == 0)) {
+            stopTyping();
+            message.setState(Message.STATE_SUCCESS);
+            message.setCompanion(companionId);
+            dbHelper.addMessToDb(message, companionId);
 
-                messInput.setText("");
-            }
-        });
-        Log.d("myLogs", message.getBody());
+            chatAdapter.setCursor(dbHelper.getMessageList(companionId));
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    updateChatView();
+                }
+            });
+        }
+    }
+
+    private void updateChatView() {
+        chatAdapter.notifyItemInserted(chatAdapter.getItemCount() - 1);
+        chatManager.scrollToPosition(chatAdapter.getItemCount() - 1);
+        messInput.setText("");
+
     }
 
     @Override
@@ -315,23 +326,17 @@ public class ChatActivity extends AppCompatActivity implements SocketListener{
                 chatView.setPadding(0, 0, 0, 100);
                 findViewById(R.id.icTyping).setVisibility(View.VISIBLE);
                 animation.start();
+                isTyping = false;
 
                 new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        isTyping = false;
+                        if (isTyping) return;
 
-                        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (isTyping) return;
-
-                                chatView.setPadding(0,0,0,0);
-                                findViewById(R.id.icTyping).setVisibility(View.GONE);
-                            }
-                        }, 1500);
+                        chatView.setPadding(0,0,0,0);
+                        findViewById(R.id.icTyping).setVisibility(View.GONE);
                     }
-                }, 500);
+                }, 1500);
             }
         });
     }

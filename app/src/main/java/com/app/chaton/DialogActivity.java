@@ -72,6 +72,9 @@ public class DialogActivity extends AppCompatActivity implements PullRefreshLayo
                 btnTryAgain.setVisibility(View.GONE);
                 findViewById(R.id.progressView).setVisibility(View.VISIBLE);
                 findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
+
+                ((WeTuneApplication) getApplication()).connectToSocket(preferenceHelper.getId(),
+                        preferenceHelper.getSecretKey());
                 uploadDialogsList();
             }
         });
@@ -101,7 +104,8 @@ public class DialogActivity extends AppCompatActivity implements PullRefreshLayo
         ((TextView) findViewById(R.id.tvTryAgain)).setTypeface(myriad);
 
         if (!getIntent().getBooleanExtra(AUTH_REQUEST_SENT, true)) authUser(savedInstanceState);
-        else if (savedInstanceState == null) uploadDialogsList();
+//        else if (savedInstanceState == null) uploadDialogsList();
+        else uploadDialogsList();
 
     }
 
@@ -111,22 +115,22 @@ public class DialogActivity extends AppCompatActivity implements PullRefreshLayo
         if (socketHelper != null && socketHelper.hasNewMess()) uploadDialogsList();
     }
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putBoolean("isDataUploaded", isDataUploaded);
-        if (isDataUploaded)
-            outState.putSerializable("messageList", new ArrayList<>(dialogAdapter.getMessageList()));
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        if (savedInstanceState.getBoolean("isDataUploaded"))
-            if (savedInstanceState.getSerializable("messageList") != null)
-                setDialogPanel((List<Message>) savedInstanceState.getSerializable("messageList"));
-            else uploadDialogsList();
-    }
+//    @Override
+//    protected void onSaveInstanceState(Bundle outState) {
+//        super.onSaveInstanceState(outState);
+//        outState.putBoolean("isDataUploaded", isDataUploaded);
+//        if (isDataUploaded)
+//            outState.putSerializable("messageList", new ArrayList<>(dialogAdapter.getMessageList()));
+//    }
+//
+//    @Override
+//    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+//        super.onRestoreInstanceState(savedInstanceState);
+//        if (savedInstanceState.getBoolean("isDataUploaded"))
+//            if (savedInstanceState.getSerializable("messageList") != null)
+//                setDialogPanel((List<Message>) savedInstanceState.getSerializable("messageList"));
+//            else uploadDialogsList();
+//    }
 
     @Override
     public void onRefresh() {
@@ -252,7 +256,6 @@ public class DialogActivity extends AppCompatActivity implements PullRefreshLayo
                     Intent intent = new Intent(DialogActivity.this, ChatActivity.class);
                     intent.putExtra(PreferenceHelper.ID, companionId);
                     intent.putExtra(PreferenceHelper.NAME, companionName);
-                    intent.putExtra(PreferenceHelper.AVATAR, companionAvatar);
                     startActivity(intent);
                 }
             };

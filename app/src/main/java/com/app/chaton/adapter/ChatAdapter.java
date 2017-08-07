@@ -1,7 +1,6 @@
 package com.app.chaton.adapter;
 
-import android.content.Context;
-import android.graphics.BitmapFactory;
+import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,37 +11,31 @@ import android.widget.TextView;
 
 import com.app.chaton.API_helpers.Message;
 import com.app.chaton.R;
-import com.app.chaton.Utils.ImageDownloader;
-
-import java.util.List;
 
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
 
-    private Context context;
-    private List<Message> message_list;
-    private String companionName, myName, companionAvatar, myAvatar;
+    private Cursor cursor;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        public TextView messName, messBody;
-        public ImageView messImage, messViewed;
+        public TextView messBody;
+        public ImageView messViewed, icError, icProcess;
 
         public ViewHolder(View itemView) {
             super(itemView);
-            messName = (TextView) itemView.findViewById(R.id.messName);
             messBody = (TextView) itemView.findViewById(R.id.messBody);
-            messImage = (ImageView) itemView.findViewById(R.id.messImage);
             messViewed = (ImageView) itemView.findViewById(R.id.icNotViewed);
+            icError = (ImageView) itemView.findViewById(R.id.icError);
+            icProcess = (ImageView) itemView.findViewById(R.id.icProcess);
         }
     }
 
-    public ChatAdapter(Context context, List<Message> message_list, String myName,
-                       String companion_name, String myAvatar, String companionAvatar) {
-        this.context = context;
-        this.message_list = message_list;
-        this.companionName = companion_name;
-        this.myName = myName;
-        this.myAvatar = myAvatar;
-        this.companionAvatar = companionAvatar;
+    public ChatAdapter(Cursor cursor) {
+        this.cursor = cursor;
+    }
+
+    public void setCursor(Cursor cursor) {
+        Log.d("myLogs", "cursor " + cursor.getCount());
+        this.cursor = cursor;
     }
 
     @Override
@@ -55,41 +48,32 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
     }
 
     @Override
-    public void onBindViewHolder(final ChatAdapter.ViewHolder message_view, int position) {
-        Message message = this.message_list.get(position);
+    public void onBindViewHolder(ViewHolder message_view, int position) {
+        cursor.moveToPosition(position);
 
-        if (message_view.getItemViewType() == Message.TYPE_TO) {
-            message_view.messName.setText(myName);
-
-            if (!message.isViewed()) message_view.messViewed.setVisibility(View.VISIBLE);
-            new ImageDownloader(context, myAvatar) {
-                @Override
-                protected void onPostExecute(byte[] bm_data) {
-                    super.onPostExecute(bm_data);
-                    message_view.messImage.setImageBitmap(BitmapFactory.decodeByteArray(bm_data, 0, bm_data.length));
-                }
-            }.execute();
-        } else {
-            message_view.messName.setText(companionName);
-            new ImageDownloader(context, companionAvatar) {
-                @Override
-                protected void onPostExecute(byte[] bm_data) {
-                    super.onPostExecute(bm_data);
-                    message_view.messImage.setImageBitmap(BitmapFactory.decodeByteArray(bm_data, 0, bm_data.length));
-                }
-            }.execute();
+        if (message_view.getItemViewType() == Message.TYPE_TO)
+            switch (cursor.getInt(7)) {
+                case Message.STATE_PROCESS:
+                    message_view.icProcess.setVisibility(View.VISIBLE);
+                    break;
+                case Message.STATE_FAILURE:
+                    message_view.icError.setVisibility(View.VISIBLE);
+                    break;
+                case Message.STATE_SUCCESS:
+                    if (cursor.getInt(5) == 0) message_view.messViewed.setVisibility(View.VISIBLE);
         }
 
-        message_view.messBody.setText(message.getBody());
+        message_view.messBody.setText(cursor.getString(4));
     }
 
     @Override
     public int getItemViewType(int position) {
-        return this.message_list.get(position).getType();
+        cursor.moveToPosition(position);
+        return cursor.getInt(3);
     }
 
     @Override
-    public int getItemCount() { return this.message_list.size(); }
-
-    public List<Message> getMessageList() { return this.message_list; }
+    public int getItemCount() {
+        return cursor.getCount();
+    }
 }

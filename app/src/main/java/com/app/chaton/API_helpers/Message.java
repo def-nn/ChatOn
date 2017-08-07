@@ -5,9 +5,13 @@ import android.os.Parcelable;
 
 import java.util.HashMap;
 
-public class Message implements Parcelable{
+public class Message{
     public static final int TYPE_TO = 0;
     public static final int TYPE_FROM = 1;
+
+    public static final int STATE_PROCESS = 0;
+    public static final int STATE_SUCCESS = 1;
+    public static final int STATE_FAILURE = 2;
 
     public static final String ID = "id";
     public static final String OWNER = "owner";
@@ -17,34 +21,49 @@ public class Message implements Parcelable{
     public static final String VIEWED = "viewed";
     public static final String CREATED_AT = "created_at";
     public static final String USERNAME = "username";
+    public static final String TYPE = "type";
+    public static final String STATE = "state";
+    public static final String TEMP_ID = "temp_id";
 
     private Long id;
     private Long owner;
     private Long companion;
     private Long receiver;
     private String message;
-    private Long viewed;
+    private Integer viewed;
     private Long created_at;
     private User username;
+    private int state;
+    private String temp_id;
 
     public Message(HashMap<String, Object> data) {
         this.id = (Long) data.get(ID);
         this.owner = (Long) data.get(OWNER);
         this.receiver = (Long) data.get(RECEIVER);
         this.message = (String) data.get(MESSAGE);
+        this.viewed = 0;
+        this.created_at = (Long) data.get(CREATED_AT);
+        this.temp_id = (data.containsKey(TEMP_ID)) ?
+                (String) data.get(TEMP_ID) :
+                Message.createTempId(this.id, companion, created_at);
         // TODO
     }
 
-    public void setCompanion(Long companion) { this.companion = companion; }
+    public void setCompanion(long companion) { this.companion = companion; }
+    public void setCreatedAt(long created_at) { this.created_at = created_at; }
+    public void setState(int state) { this.state = state; }
 
     public long getId() { return this.id; }
+    public String getTempId() { return this.temp_id; }
     public User getCompanion() { return this.username; }
 
     public Long from() { return this.owner; }
     public Long to() { return this.receiver; }
 
-    public String getBody() { return this.message; }
+    public String getBody() { return this.message.trim(); }
+
     public boolean isViewed() { return (this.viewed != null && this.viewed != 0); }
+    public int getViewed() { return this.viewed; }
 
     public long createdAt() { return this.created_at; }
 
@@ -52,43 +71,9 @@ public class Message implements Parcelable{
         return ((companion.equals(receiver)) ? TYPE_TO : TYPE_FROM);
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
+    public int getState() { return this.state; }
+
+    public static String createTempId(Long id, Long companionId, Long created_at) {
+        return RequestHelper.encode_s("temp_id" + id + companionId + created_at);
     }
-
-    @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeLong(id);
-        parcel.writeLong(owner);
-        parcel.writeLong(companion);
-        parcel.writeLong(receiver);
-        parcel.writeString(message);
-        parcel.writeLong(viewed);
-        parcel.writeLong(created_at);
-        parcel.writeParcelable(username, PARCELABLE_WRITE_RETURN_VALUE);
-    }
-
-    protected Message(Parcel parcel) {
-        this.id = parcel.readLong();
-        this.owner = parcel.readLong();
-        this.companion = parcel.readLong();
-        this.receiver = parcel.readLong();
-        this.message = parcel.readString();
-        this.viewed = parcel.readLong();
-        this.created_at = parcel.readLong();
-        this.username = parcel.readParcelable(getClass().getClassLoader());
-    }
-
-    public static final Creator<Message> CREATOR = new Creator<Message>() {
-        @Override
-        public Message createFromParcel(Parcel in) {
-            return new Message(in);
-        }
-
-        @Override
-        public Message[] newArray(int size) {
-            return new Message[size];
-        }
-    };
 }

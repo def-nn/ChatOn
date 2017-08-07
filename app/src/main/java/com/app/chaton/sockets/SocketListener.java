@@ -7,8 +7,9 @@ public interface SocketListener {
     Long getCompanionId();
 
     void setTyping(boolean isTyping);
-    void stopTyping();
 
     void onMessageReceived(Message message);
+
     void onTypePending();
+    void stopTyping();
 }

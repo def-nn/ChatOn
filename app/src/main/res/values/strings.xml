@@ -1,8 +1,6 @@
 <resources>
     <string name="app_name">WeTune</string>
 
-    <string name="API_BASE_URL">https://chaton.ga/api</string>
-
     <string name="PREFERENCE_FILE">ChatOnPref</string>
 
     <string name="signUp">Sign up</string>

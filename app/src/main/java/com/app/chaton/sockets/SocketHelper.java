@@ -42,6 +42,7 @@ public class SocketHelper {
     private static final String SENDER = "sender";
     private static final String RECEIVER = "receiver";
     private static final String ID = "id";
+    private static final String CREATED_AT = "created_at";
 
     private static final String ACT_MESSAGE = "message";
     private static final String ACT_TYPING = "type_pending";
@@ -74,24 +75,25 @@ public class SocketHelper {
             switch (jsonObject.get(ACT).getAsString()) {
                 case ACT_MESSAGE:
                     JsonObject data = jsonObject.get(DATA).getAsJsonObject();
-                    if (data.get(RECEIVER).getAsJsonObject().get(ID).getAsLong() == id)
-                        messageStack.add(data.get(SENDER).getAsJsonObject().get(ID).getAsLong());
-                    else messageStack.add(data.get(RECEIVER).getAsJsonObject().get(ID).getAsLong());
 
-                    Log.d("myLogs", "stack " + messageStack);
-
-                    if (data.get(SENDER).getAsJsonObject().get(ID).getAsLong() == socketListener.getCompanionId()) {
-
+                    if (data.get(SENDER).getAsJsonObject().get(ID).getAsLong() == socketListener.getCompanionId() ||
+                            data.get(RECEIVER).getAsJsonObject().get(ID).getAsLong() == socketListener.getCompanionId()) {
                         HashMap<String, Object> mess_data = new HashMap<>();
                         mess_data.put(Message.ID, data.get(ID).getAsLong());
                         mess_data.put(Message.OWNER, data.get(SENDER).getAsJsonObject().get(ID).getAsLong());
                         mess_data.put(Message.RECEIVER, data.get(RECEIVER).getAsJsonObject().get(ID).getAsLong());
                         mess_data.put(Message.MESSAGE, data.get(MESSAGE).getAsString());
+                        mess_data.put(Message.CREATED_AT, data.get(CREATED_AT).getAsLong());
+                        try {
+                            mess_data.put(Message.TEMP_ID, jsonObject.get(TEMP_ID).getAsString());
+                        } catch (UnsupportedOperationException e) {
+                            mess_data.put(Message.TEMP_ID, null);
+                        }
                         // TODO
-
-                        socketListener.stopTyping();
+                        Log.d("myLogs", "mess " + mess_data.toString());
                         socketListener.onMessageReceived(new Message(mess_data));
                     }
+
                     break;
                 case ACT_TYPING:
                     if (jsonObject.get(SENDER).getAsLong() == socketListener.getCompanionId()) {
@@ -165,12 +167,12 @@ public class SocketHelper {
         connect();
     }
 
-    public void send(Long reciever, String message) throws WebsocketNotConnectedException {
+    public void send(Long receiver, String message) throws WebsocketNotConnectedException {
         if (!client.getConnection().isOpen()) reconnect();
 
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty(ACT, ACT_MESSAGE);
-        jsonObject.addProperty(U_ID, reciever);
+        jsonObject.addProperty(U_ID, receiver);
         jsonObject.addProperty(MESSAGE, message);
 
         client.send(jsonObject.toString());

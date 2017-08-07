@@ -13,9 +13,6 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 
-import java.io.IOException;
-
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -44,6 +41,8 @@ public abstract class RequestHelper {
         call.enqueue(new Callback<MapResponseObject>() {
             @Override
             public void onResponse(Call<MapResponseObject> call, Response<MapResponseObject> response) {
+                Log.d("myLogs", "body " + response.body().getData().toString());
+                Log.d("myLogs", "code " + response.body().getStatus());
                 switch (response.body().getStatus()) {
                     case STATUS_OK:
                         onStatusOk(response.body());
@@ -62,6 +61,7 @@ public abstract class RequestHelper {
 
             @Override
             public void onFailure(Call<MapResponseObject> call, Throwable t) {
+                Log.d("myLogs", "failure " + t.toString());
                 onFail(t);
             }
         });

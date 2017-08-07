@@ -6,7 +6,6 @@ import android.graphics.Typeface;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,27 +26,27 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class DialogAdapter extends RecyclerView.Adapter<DialogAdapter.ViewHolder>{
 
-    private final static int DAY_MILLS = 86400000;
+    protected final static int DAY_MILLS = 86400000;
 
-    private DialogActivity.DialogListenerFactory dialogListenerFactory;
+    protected DialogActivity.DialogListenerFactory dialogListenerFactory;
 
-    private Activity activity;
+    protected Activity activity;
     private List<Message> message_list;
-    private PreferenceHelper preferenceHelper;
+    protected PreferenceHelper preferenceHelper;
 
-    private SimpleDateFormat timePattern, datePattern;
+    protected SimpleDateFormat timePattern, datePattern;
     {
         timePattern = new SimpleDateFormat("HH:mm");
         datePattern = new SimpleDateFormat("MMM d");
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        public ViewGroup dialogLayout;
-        public TextView name, text, date;
-        public ImageView status;
-        public CircleImageView friendImage, ownerImage;
+    static class ViewHolder extends RecyclerView.ViewHolder {
+        ViewGroup dialogLayout;
+        TextView name, text, date;
+        ImageView status;
+        CircleImageView friendImage, ownerImage;
 
-        public ViewHolder(View itemView) {
+        ViewHolder(View itemView) {
             super(itemView);
             this.name = (TextView) itemView.findViewById(R.id.friendName);
             this.text = (TextView) itemView.findViewById(R.id.friendMess);
@@ -133,7 +132,7 @@ public class DialogAdapter extends RecyclerView.Adapter<DialogAdapter.ViewHolder
                                                      message.getCompanion().getAvatar()));
     }
 
-    private String getDateCreation(Long created_at) {
+    protected String getDateCreation(Long created_at) {
         Date creation_date = new Date(created_at * 1000);
         long time_diff = new Date().getTime() - creation_date.getTime();
 

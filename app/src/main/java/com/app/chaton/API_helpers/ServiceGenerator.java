@@ -7,7 +7,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ServiceGenerator {
 
-    public static final String API_BASE_URL = "https://chaton.ga/api/";
+    public static final String API_BASE_URL = "https://trident.ga/api/";
 
     private static OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
     private static Retrofit.Builder retrofitBuilder =
